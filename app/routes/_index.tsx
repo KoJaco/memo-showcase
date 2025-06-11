@@ -1,4 +1,32 @@
 import type { MetaFunction } from "@remix-run/node";
+import { Link } from "@remix-run/react";
+import { Equal } from "lucide-react";
+import { useInView } from "motion/react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
+import { Fader, FaderStagger } from "~/components//fader";
+import BackgroundStatic from "~/components/background-static";
+import { PageIntro } from "~/components/sections/page-intro";
+import { SectionIntro } from "~/components/sections/section-intro";
+import Showcase from "~/components/showcase";
+import { Badge } from "~/components/ui/badge";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "~/components/ui/carousel";
+
+import { Container } from "~/components/ui/container";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "~/components/ui/sheet";
+import { cn } from "~/lib/utils";
 
 export const meta: MetaFunction = () => {
     return [
@@ -7,6 +35,558 @@ export const meta: MetaFunction = () => {
     ];
 };
 
+type TypeofSection = "demo" | "why" | "how" | "who-its-for" | "whats-next";
+
+type TSection = {
+    id: TypeofSection;
+    title: string | JSX.Element;
+    eyebrow: string;
+    body: string | JSX.Element;
+    image?: { src: string; aspect: number };
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: { opacity: 1, y: 0 },
+};
+
+const PAGE_NAVIGATION: {
+    id: TypeofSection;
+    title: string;
+}[] = [
+    { id: "demo", title: "demo" },
+    { id: "why", title: "why?" },
+    { id: "how", title: "how?" },
+    { id: "who-its-for", title: "who it's for" },
+    { id: "whats-next", title: "what's next?" },
+];
+
+const carouselImages = [
+    { src: "/images/display/carousel-1.jpg", aspect: 4 / 3, widthMult: 1 },
+    { src: "/images/display/carousel-2.webp", aspect: 4 / 3, widthMult: 2 },
+    // { src: "/images/display/carousel-1.jpg", aspect: 4 / 3, widthMult: 1 },
+];
+
+const SECTIONS: Record<TypeofSection, TSection> = {
+    demo: {
+        id: "demo",
+        title: (
+            <span>
+                <span className="text-primary">Voice</span> powered,
+                <br />
+                Effortless <span className="text-primary">Forms</span>
+            </span>
+        ),
+        eyebrow: "Introducing Memo",
+        body: "This is a working demo of Memo Form Filler. Just press the mic button and speak naturally — Memo will parse your intent and fill in the form fields automatically. Try something like: “Set name to Alex, email to alex@example.com, and message: I'm interested in a quote.”",
+    },
+    why: {
+        id: "why",
+        title: "Mobile forms are broken",
+        eyebrow: "Why this matters",
+        body: "Typing on a phone is slow, error-prone, and often frustrating. Whether you're juggling tasks, filling a field report, or trying to submit a lead while on the move, forms on mobile create friction. Memo eliminates this pain by letting you speak naturally and get it done faster — without tapping through tiny fields or repeating information.",
+        image: { src: "/images/display/field-service.jpg", aspect: 4 / 3 },
+    },
+    how: {
+        id: "how",
+        title: "How it works",
+        eyebrow: "Voice → Intent → Input",
+        body: (
+            // "Memo listens to your voice and uses real-time speech recognition and language understanding to determine what you're trying to do. It maps your spoken words directly to form fields using smart function parsing, then fills the form with structured data — like setting names, budgets, messages, or any other input — all in real time.",
+
+            <div>
+                <p className="text-foreground/50">
+                    Memo listens to your voice and converts it into structured
+                    actions in real time. It uses high-accuracy speech
+                    recognition combined with the Memonic engine — a natural
+                    language parser built to understand context, extract intent,
+                    and map spoken instructions directly to structured output.
+                    Whether you&apos;re saying &apos;Set budget to 500&apos; or
+                    &apos;Name is Jess, message: follow up Monday&apos;, Memo
+                    fills the form instantly, no training required.
+                </p>
+                <Badge className="text-sm mt-4 text-background/75 hover:text-primary-foreground/75 rounded-full px-4 bg-foreground transition-colors duration-300 hover:bg-primary group/badge">
+                    Powered by{" "}
+                    <a
+                        href="https://memonic.vercel.app/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline text-background ml-1 group-hover/badge:text-primary-foreground"
+                    >
+                        Memonic
+                    </a>
+                </Badge>
+            </div>
+        ),
+    },
+    "who-its-for": {
+        id: "who-its-for",
+        title: "Built for real-world use",
+        eyebrow: "Who it's for",
+        body: (
+            <div>
+                <p className="text-foreground/50">
+                    Memo is built for people who fill out forms on the go.
+                    It&apos;s ideal for field workers, customer-facing teams,
+                    and mobile-heavy workflows. It&apos;s also designed with
+                    accessibility in mind, enabling users with motor
+                    impairments, visual limitations, or dyslexia to fill out
+                    structured forms entirely by voice. Memo lowers the barrier
+                    for anyone who finds typing difficult or inefficient.,
+                </p>
+                <Carousel
+                    className="w-full max-w-xl relative mt-4"
+                    opts={{ align: "start" }}
+                >
+                    <CarouselContent>
+                        {carouselImages.map((item, index) => {
+                            return (
+                                <CarouselItem
+                                    key={`${item.aspect}_${index}`}
+                                    className={cn(
+                                        // "sm:basis-1/2",
+                                        item.widthMult == 1
+                                            ? "max-w-[300px]"
+                                            : "max-w-[444px]"
+                                    )}
+                                >
+                                    <div
+                                        className={cn(
+                                            "mt-4 rounded-lg overflow-hidden relative group/img"
+                                        )}
+                                    >
+                                        <div className="absolute bg-primary-foreground top-0 left-0 w-full h-full opacity-20 group-hover/img:opacity-10 transition-all duration-500 z-10" />
+                                        <img
+                                            src={item.src}
+                                            alt=""
+                                            className="aspect-4/5 group-hover/img:scale-105 transition-transform duration-500 "
+                                        />
+                                    </div>
+                                </CarouselItem>
+                            );
+                        })}
+                    </CarouselContent>
+                    <div className="absolute -bottom-8 left-10">
+                        <CarouselPrevious className="border-0 hover:bg-transparent hover:text-foreground right-0 shadow-none bg-transparent" />
+                        <CarouselNext className="border-0 hover:bg-transparent hover:text-foreground left-0 shadow-none bg-transparent" />
+                    </div>
+                </Carousel>
+            </div>
+        ),
+    },
+    "whats-next": {
+        id: "whats-next",
+        title: "Embed it in your app or workflow",
+        eyebrow: "What's next?",
+        body: (
+            <div>
+                <p className="text-foreground/50">
+                    Memo is currently in development but will soon be available
+                    as an embeddable script or Chrome extension. We&apos;re
+                    building a full SDK and dashboard so you can integrate voice
+                    input into any form on your site or product with just a few
+                    lines of code. Want early access?{" "}
+                    <Link
+                        to="/contact"
+                        className="text-foreground/90 hover:text-foreground"
+                    >
+                        Reach out{" "}
+                    </Link>
+                    and let&apos;s build together.
+                    <br />
+                    <br />
+                    Once Memo is released, you&apos;ll be able to:
+                </p>
+
+                <ul className="mt-8 space-y-4 text-sm text-foreground/50">
+                    <li>
+                        <strong>1.</strong> Sign up for a free Memo account to
+                        get started.
+                    </li>
+                    <li>
+                        <strong>2.</strong> Customize your component preferences
+                        — choose prompt text, voice behavior, and optionally
+                        apply your own branding styles.
+                    </li>
+                    <li>
+                        <strong>3.</strong> Copy a small generated script tag
+                        and paste it into your website&apos;s HTML.
+                    </li>
+                    <li>
+                        <strong>4.</strong> Memo automatically detects forms and
+                        gently pops up when in view, offering a seamless voice
+                        input option to your visitors.
+                    </li>
+                    <li>
+                        <strong>5.</strong> View structured analytics and usage
+                        metrics directly in your dashboard — including
+                        completions, full transcripts, cost monitoring,
+                        drop-offs, and voice command insights.
+                    </li>
+                </ul>
+            </div>
+        ),
+    },
+};
+
 export default function Index() {
-    return <div className="flex h-screen items-center justify-center"></div>;
+    // Internal state
+    // TODO: properly implement either debounce or defer for section animation
+    const [immediateSection, setImmediateSection] =
+        useState<TypeofSection | null>(null);
+    const deferredSection = useDeferredValue(immediateSection);
+
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    // Track state of internal navigation
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    const scrollToSection = (id: string) => {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    };
+
+    const handleMobileNav = (id: string) => {
+        setMenuOpen(false);
+
+        setTimeout(() => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }, 500);
+    };
+
+    return (
+        <div className="flex flex-col w-full h-full relative">
+            <BackgroundStatic />
+            <div className="w-full max-w-xl mx-auto">
+                <div className="flex flex-col max-w-xl mx-auto w-full justify-center">
+                    {/* MOBILE - Sheet */}
+                    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+                        <div className="lg:hidden">
+                            <header className="w-full h-[70px]">
+                                <div className="justify-between flex items-center h-full w-full mx-auto max-w-7xl px-6 lg:px-8">
+                                    <div className="w-auto">
+                                        <span>Memo</span>
+                                    </div>
+                                    <SheetTrigger className="ml-auto">
+                                        <Equal />
+                                    </SheetTrigger>
+                                </div>
+                            </header>
+                            <SheetContent
+                                side="top"
+                                className="w-full h-full p-2 bg-transparent border-0"
+                            >
+                                <div className="w-full h-full bg-background rounded-lg relative">
+                                    <BackgroundStatic />
+                                    <Fader className="max-w-xl mx-auto px-6 h-full">
+                                        <SheetHeader className="pt-24 sm:pt-32 lg:pt-40 text-left">
+                                            <SheetTitle>Memo</SheetTitle>
+                                            <SheetDescription>
+                                                <span className="text-primary">
+                                                    Structured{" "}
+                                                </span>
+                                                output,
+                                                <br />
+                                                Powerful{" "}
+                                                <span className="text-primary">
+                                                    natural language
+                                                </span>
+                                            </SheetDescription>
+
+                                            <div></div>
+                                        </SheetHeader>
+
+                                        <FaderStagger className="flex flex-col gap-y-4 mt-6 -ml-1">
+                                            {PAGE_NAVIGATION.map((navItem) => {
+                                                return (
+                                                    <Fader
+                                                        key={navItem.id}
+                                                        variants={itemVariants}
+                                                    >
+                                                        <button
+                                                            className={cn(
+                                                                "capitalize -ml-4 group hover:ml-1 transition-all duration-300 text-xl text-foreground/50 hover:text-primary"
+                                                            )}
+                                                            onClick={() =>
+                                                                handleMobileNav(
+                                                                    SECTIONS[
+                                                                        navItem
+                                                                            .id
+                                                                    ].id
+                                                                )
+                                                            }
+                                                        >
+                                                            <span
+                                                                className={cn(
+                                                                    "mr-2 opacity-0 duration-300 transition-all group-hover:opacity-100 text-foreground/50"
+                                                                )}
+                                                            >
+                                                                #
+                                                            </span>
+                                                            {navItem.title}
+                                                        </button>
+                                                    </Fader>
+                                                );
+                                            })}
+                                        </FaderStagger>
+                                    </Fader>
+                                </div>
+                            </SheetContent>
+                        </div>
+                    </Sheet>
+
+                    {/* Desktop */}
+                    <FaderStagger
+                        key="fixed-nav"
+                        className={cn(
+                            "max-w-[160px] text-sm gap-y-2 flex-col text-foreground/50 lg:flex hidden transition-opacity duration-300 fixed left-10 top-40 group/nav",
+
+                            !deferredSection ? "opacity-0" : "opacity-100"
+                        )}
+                    >
+                        <Fader>
+                            <h1 className="text-xl text-foreground mb-2">
+                                Memo
+                            </h1>
+                            <p className="text-md mb-4">
+                                Structured output, <br />
+                                powerful natural language
+                            </p>
+                        </Fader>
+                        {PAGE_NAVIGATION.map((navItem) => {
+                            return (
+                                <Fader key={navItem.id} variants={itemVariants}>
+                                    <button
+                                        // href={`#${navItem.id}`}
+                                        className={cn(
+                                            "capitalize -ml-4 group/item hover:-ml-0 transition-all duration-300",
+                                            deferredSection === navItem.id &&
+                                                "-ml-0"
+                                        )}
+                                        onClick={() =>
+                                            scrollToSection(
+                                                SECTIONS[navItem.id].id
+                                            )
+                                        }
+                                    >
+                                        <span
+                                            className={cn(
+                                                "mr-2 opacity-0 duration-300 transition-all group-hover/item:opacity-100 group-hover/item:text-foreground/25",
+                                                deferredSection === navItem.id
+                                                    ? "opacity-100 text-primary/75"
+                                                    : "opacity-0"
+                                            )}
+                                        >
+                                            #
+                                        </span>
+                                        <span
+                                            className={cn(
+                                                deferredSection === navItem.id
+                                                    ? "text-primary"
+                                                    : "text-foreground/25"
+                                            )}
+                                        >
+                                            {navItem.title}
+                                        </span>
+                                    </button>
+                                </Fader>
+                            );
+                        })}
+                    </FaderStagger>
+                </div>
+            </div>
+
+            <div ref={containerRef} className="flex flex-col gap-y-32 h-full">
+                {Object.keys(SECTIONS).map((sectionKey, index) => {
+                    const section = SECTIONS[sectionKey as TypeofSection];
+
+                    if (index === 0) {
+                        return (
+                            <HeaderSection
+                                key={section.id + "_" + index}
+                                sectionKey={sectionKey as TypeofSection}
+                                section={section}
+                                setImmediateSection={setImmediateSection}
+                            />
+                        );
+                    } else {
+                        return (
+                            <BodySection
+                                key={sectionKey}
+                                sectionKey={sectionKey as TypeofSection}
+                                index={index}
+                                section={section}
+                                setImmediateSection={setImmediateSection}
+                            />
+                        );
+                    }
+                })}
+            </div>
+
+            <Footer />
+        </div>
+    );
+}
+
+function HeaderSection({
+    sectionKey,
+    section,
+    setImmediateSection,
+}: {
+    sectionKey: TypeofSection;
+    section: TSection;
+    setImmediateSection: (sectionKey: TypeofSection) => void;
+}) {
+    const sectionRef = useRef(null);
+    const inView = useInView(sectionRef, { margin: "-50% 0px -50% 0px" });
+
+    useEffect(() => {
+        if (inView) {
+            setImmediateSection(sectionKey);
+        }
+    }, [inView, sectionKey, setImmediateSection]);
+
+    return (
+        <div
+            key={section.id}
+            ref={sectionRef}
+            id={section.id}
+            className="w-full max-w-xl mx-auto scroll-mt-20 bg-transparent h-full"
+        >
+            <PageIntro eyebrow={section.eyebrow} title={section.title}>
+                <p>
+                    Typing on mobile is slow, clumsy, and frustrating. Memo lets
+                    you fill out any online form using your voice —
+                    intelligently mapping natural language to structured fields
+                    in real time. No extensions, no training, just speak.
+                </p>
+            </PageIntro>
+            <Container className="mt-12">
+                <Showcase />
+            </Container>
+        </div>
+    );
+}
+
+function BodySection({
+    sectionKey,
+    index,
+    section,
+    setImmediateSection,
+}: {
+    sectionKey: TypeofSection;
+    index: number;
+    section: TSection;
+    setImmediateSection: (sectionKey: TypeofSection) => void;
+}) {
+    const ref = useRef(null);
+    const inView = useInView(ref, { margin: "-50% 0px -50% 0px" });
+
+    useEffect(() => {
+        if (inView) {
+            setImmediateSection(sectionKey);
+        }
+    }, [inView, sectionKey, setImmediateSection]);
+
+    return (
+        <section
+            key={sectionKey + "_" + index}
+            id={sectionKey}
+            ref={ref}
+            className="flex flex-col bg-transparent h-full w-full scroll-mt-40"
+        >
+            <div className="min-h-[600px] max-w-xl text-left w-full mx-auto">
+                <SectionIntro
+                    eyebrow={`${section.eyebrow}`}
+                    title={section.title}
+                />
+                <Container className="mt-8">
+                    <Fader>
+                        <div>
+                            {typeof section.body === "string" ? (
+                                <p className="whitespace-pre-line text-foreground/50">
+                                    {section.body}
+                                </p>
+                            ) : (
+                                <>{section.body}</>
+                            )}
+                        </div>
+                        {section.image && (
+                            <div className="mt-4 rounded-lg overflow-hidden relative group/img">
+                                <div className="absolute bg-primary-foreground top-0 left-0 w-full h-full opacity-20 group-hover/img:opacity-10 transition-all duration-500 z-10" />
+                                <img
+                                    src={section.image.src}
+                                    alt=""
+                                    className="group-hover/img:scale-105 transition-transform duration-500"
+                                />
+                            </div>
+                        )}
+                    </Fader>
+                </Container>
+            </div>
+        </section>
+    );
+}
+
+function Footer() {
+    return (
+        <footer className="min-h-[200px] mt-24">
+            <Container className="max-w-xl">
+                <div className="max-w-xl mx-auto flex flex-col gap-8 border-t py-8">
+                    <div className="w-full grid grid-cols-2">
+                        <ul className="text-xs text-foreground/75 gap-2 flex flex-col">
+                            <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300 group/linkout">
+                                <span className="flex w-1 h-1 rounded-full bg-foreground/50" />
+
+                                <button>Contact</button>
+                                {/* <MoveRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover/linkout:opacity-100 group-hover/linkout:translate-x-0 transition-all duration-300" /> */}
+                            </li>
+                            <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300 group/linkout">
+                                <span className="flex w-1 h-1 rounded-full bg-foreground/50" />
+
+                                <a
+                                    href="https://memonic.vercel.app/"
+                                    rel="noreferrer"
+                                    target="_blank"
+                                >
+                                    Checkout Memonic
+                                </a>
+                                {/* <MoveUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover/linkout:opacity-100 group-hover/linkout:translate-x-0 transition-all duration-300" /> */}
+                            </li>
+                        </ul>
+                        <ul className="text-xs text-foreground/75 gap-2 flex flex-col">
+                            <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300">
+                                <span className="flex w-1 h-1 rounded-full bg-foreground/50" />
+                                <button>Terms of Service</button>
+                            </li>
+                            <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300">
+                                <span className="flex w-1 h-1 rounded-full bg-foreground/50" />
+                                <Link to="policies/privacy-policy">
+                                    Privacy Policy
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="text-xs text-foreground/50">
+                        <span className="text-primary">Memo </span>
+                        is made with love by{" "}
+                        <Link
+                            to="https://www.korijacobsen.au/"
+                            className="text-foreground/75"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Kori Jacobsen
+                        </Link>
+                    </div>
+                </div>
+            </Container>
+        </footer>
+    );
 }
