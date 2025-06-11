@@ -7,7 +7,7 @@ import { Fader, FaderStagger } from "~/components//fader";
 import BackgroundStatic from "~/components/background-static";
 import { PageIntro } from "~/components/sections/page-intro";
 import { SectionIntro } from "~/components/sections/section-intro";
-import Showcase from "~/components/showcase";
+import { FullShowcase } from "~/components/showcases";
 import { Badge } from "~/components/ui/badge";
 import {
     Carousel,
@@ -95,10 +95,8 @@ const SECTIONS: Record<TypeofSection, TSection> = {
     how: {
         id: "how",
         title: "How it works",
-        eyebrow: "Voice → Intent → Input",
+        eyebrow: "Voice → Intent → Structured Output",
         body: (
-            // "Memo listens to your voice and uses real-time speech recognition and language understanding to determine what you're trying to do. It maps your spoken words directly to form fields using smart function parsing, then fills the form with structured data — like setting names, budgets, messages, or any other input — all in real time.",
-
             <div>
                 <p className="text-foreground/50">
                     Memo listens to your voice and converts it into structured
@@ -479,7 +477,7 @@ function HeaderSection({
                 </p>
             </PageIntro>
             <Container className="mt-12">
-                <Showcase />
+                <FullShowcase />
             </Container>
         </div>
     );
