@@ -1,11 +1,8 @@
-// import { Send } from "lucide-react";
 import { Fader } from "~/components//fader";
 import { Button } from "../ui/button";
-import { RadioInput, TextArea, TextInput } from "./elements";
-import { ActionFunctionArgs, redirect } from "@remix-run/node";
+import { TextAreaInput, TextInput } from "./elements";
+import { ActionFunctionArgs } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
-
-const serviceTypes = ["Website", "E-commerce", "Freelance"];
 
 type FormErrors = {
     email?: string;
@@ -30,10 +27,6 @@ export async function action({ request }: ActionFunctionArgs) {
         errors.email = "Invalid email address, must include @.";
     }
 
-    if (!serviceTypes.includes(service)) {
-        errors.service = `Service type ${service} is not a valid selection.`;
-    }
-
     if (service.length === 0) {
         errors.service = "Please select a service type.";
     }
@@ -43,10 +36,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return { errors: errors };
     }
 
-    // TODO: implement submit to db.
-
-    // redirect to /contact upon success
-    return redirect("/");
+    return {};
 }
 
 export function ContactForm() {
@@ -54,11 +44,11 @@ export function ContactForm() {
 
     return (
         <Fader>
-            <form method="post">
-                <h2 className="font-display text-base font-semibold text-foreground">
-                    Work inquiries
+            <form method="post" className="border rounded-lg p-4 shadow">
+                <h2 className="font-display text-base font-semibold text-primary">
+                    All Inquiries
                 </h2>
-                <div className="isolate mt-6 -space-y-px rounded-md bg-background/25 focus-within:bg-background/50">
+                <div className="isolate mt-6 rounded-md bg-background/25 focus-within:bg-background/50 space-y-4 text-foreground/75">
                     <TextInput label="Name" name="name" autoComplete="name" />
                     <TextInput
                         label="Email"
@@ -78,37 +68,9 @@ export function ContactForm() {
                         name="phone"
                         autoComplete="tel"
                     />
-                    <TextArea label="message" name="message" />
-                    {/* <TextInput label="Message" name="message" /> */}
-                    <div className="border border-foreground/25 px-6 py-8 first:rounded-t-md last:rounded-b-md">
-                        <fieldset>
-                            <legend className="text-base/6 text-foreground/50">
-                                Service
-                            </legend>
-                            <div className="mt-6 grid grid-cols-1 gap-8 sm:grid-cols-2">
-                                <RadioInput
-                                    label="Website"
-                                    name="service"
-                                    value="25"
-                                />
-                                <RadioInput
-                                    label="E-commerce"
-                                    name="service"
-                                    value="50"
-                                />
-                                <RadioInput
-                                    label="Freelance"
-                                    name="service"
-                                    value="100"
-                                />
-                            </div>
-                        </fieldset>
-                        {actionData?.errors?.service && (
-                            <em>{actionData.errors.service}</em>
-                        )}
-                    </div>
+                    <TextAreaInput label="Message" name="message" />
                 </div>
-                <Button type="submit" className="mt-10 group">
+                <Button type="submit" className="mt-10 group rounded-full">
                     <span className="flex items-center">
                         Let&apos;s work together{" "}
                         <svg

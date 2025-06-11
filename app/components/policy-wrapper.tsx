@@ -16,7 +16,7 @@ const PolicyWrapper = ({ title, effectiveDate, sections }: Props) => {
                     <em>Effective Date: {effectiveDate}</em>
                 </span>
             </PageIntro>
-            <Container className="my-10 text-left max-w-[900px] mx-auto">
+            <Container className="my-10 text-left max-w-xl mx-auto">
                 <Fader className="flex flex-col gap-8">
                     {sections.map((section, index) => (
                         <div key={index} className="text-foreground/50">

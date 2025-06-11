@@ -280,11 +280,11 @@ export default function Index() {
                             </header>
                             <SheetContent
                                 side="top"
-                                className="w-full h-full p-2 bg-transparent border-0"
+                                className="w-full h-auto p-2 bg-transparent border-0"
                             >
                                 <div className="w-full h-full bg-background rounded-lg relative">
                                     <BackgroundStatic />
-                                    <Fader className="max-w-xl mx-auto px-6 h-full">
+                                    <Fader className="max-w-xl mx-auto px-6 h-full w-full">
                                         <SheetHeader className="pt-24 sm:pt-32 lg:pt-40 text-left">
                                             <SheetTitle>Memo</SheetTitle>
                                             <SheetDescription>
@@ -336,6 +336,8 @@ export default function Index() {
                                             })}
                                         </FaderStagger>
                                     </Fader>
+                                    {/* <Footer className="mt-auto absolute w-full left-0 bottom-0" /> */}
+                                    <Footer className="block w-full h-auto md:mt-24 mt-12" />
                                 </div>
                             </SheetContent>
                         </div>
@@ -534,9 +536,9 @@ function BodySection({
     );
 }
 
-function Footer() {
+function Footer({ className }: { className?: string }) {
     return (
-        <footer className="min-h-[200px] mt-24">
+        <footer className={cn("min-h-[200px] mt-24", className && className)}>
             <Container className="max-w-xl">
                 <div className="max-w-xl mx-auto flex flex-col gap-8 border-t py-8">
                     <div className="w-full grid grid-cols-2">
@@ -544,7 +546,7 @@ function Footer() {
                             <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300 group/linkout">
                                 <span className="flex w-1 h-1 rounded-full bg-foreground/50" />
 
-                                <button>Contact</button>
+                                <Link to="/contact">Contact</Link>
                                 {/* <MoveRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover/linkout:opacity-100 group-hover/linkout:translate-x-0 transition-all duration-300" /> */}
                             </li>
                             <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300 group/linkout">
@@ -563,7 +565,9 @@ function Footer() {
                         <ul className="text-xs text-foreground/75 gap-2 flex flex-col">
                             <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300">
                                 <span className="flex w-1 h-1 rounded-full bg-foreground/50" />
-                                <button>Terms of Service</button>
+                                <Link to="policies/terms-of-service">
+                                    Terms of Service
+                                </Link>
                             </li>
                             <li className="hover:text-foreground flex items-center gap-1 transition-colors duration-300">
                                 <span className="flex w-1 h-1 rounded-full bg-foreground/50" />

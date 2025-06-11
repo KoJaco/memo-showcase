@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import BackgroundStatic from "~/components/background-static";
 import { Fader } from "~/components//fader";
 
-const PoliciesLayout = () => {
+const ContactLayout = () => {
     return (
         <div className="relative h-full w-full">
             <BackgroundStatic />
@@ -28,10 +28,10 @@ const PoliciesLayout = () => {
                 </div>
             </header>
 
-            {/* Desktop  */}
+            {/* Desktop */}
             <div className="max-w-[160px] text-sm gap-y-2 flex-col text-foreground/50 lg:flex hidden transition-opacity duration-300 fixed left-10 top-40 group/nav">
                 <Fader>
-                    <span className="text-xl text-foreground mb-2">Memo</span>
+                    <h1 className="text-xl text-foreground mb-2">Memo</h1>
                     <p className="text-md mb-4">
                         Structured output, <br />
                         powerful natural language
@@ -52,4 +52,4 @@ const PoliciesLayout = () => {
     );
 };
 
-export default PoliciesLayout;
+export default ContactLayout;
