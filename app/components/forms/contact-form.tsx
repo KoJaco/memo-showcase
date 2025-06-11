@@ -44,11 +44,14 @@ export function ContactForm() {
 
     return (
         <Fader>
-            <form method="post" className="border rounded-lg p-4 shadow">
+            <form
+                method="post"
+                className="border rounded-lg p-4 shadow bg-primary-foreground/75"
+            >
                 <h2 className="font-display text-base font-semibold text-primary">
                     All Inquiries
                 </h2>
-                <div className="isolate mt-6 rounded-md bg-background/25 focus-within:bg-background/50 space-y-4 text-foreground/75">
+                <div className="isolate mt-6 rounded-md -mx-2 -mb-2 p-2 focus-within:bg-primary/5 space-y-4 text-foreground/75 transition-colors duration-300">
                     <TextInput label="Name" name="name" autoComplete="name" />
                     <TextInput
                         label="Email"

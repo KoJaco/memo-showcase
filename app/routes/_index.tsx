@@ -1,6 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { Equal } from "lucide-react";
+import { Equal, ExternalLink } from "lucide-react";
 import { useInView } from "motion/react";
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { Fader, FaderStagger } from "~/components//fader";
@@ -82,7 +82,12 @@ const SECTIONS: Record<TypeofSection, TSection> = {
     },
     why: {
         id: "why",
-        title: "Mobile forms are broken",
+        title: (
+            <p>
+                <span className="text-primary">Mobile Forms </span>
+                are Broken
+            </p>
+        ),
         eyebrow: "Why this matters",
         body: "Typing on a phone is slow, error-prone, and often frustrating. Whether you're juggling tasks, filling a field report, or trying to submit a lead while on the move, forms on mobile create friction. Memo eliminates this pain by letting you speak naturally and get it done faster — without tapping through tiny fields or repeating information.",
         image: { src: "/images/display/field-service.jpg", aspect: 4 / 3 },
@@ -115,6 +120,7 @@ const SECTIONS: Record<TypeofSection, TSection> = {
                     >
                         Memonic
                     </a>
+                    <ExternalLink className="ml-2 w-4 h-4" />
                 </Badge>
             </div>
         ),
@@ -126,7 +132,10 @@ const SECTIONS: Record<TypeofSection, TSection> = {
         body: (
             <div>
                 <p className="text-foreground/50">
-                    Memo is built for people who fill out forms on the go.
+                    Memo is built for people who fill out forms on the go, for
+                    those who struggle with form inputs, and for workflows that
+                    require a lot of manual data entry. <br />
+                    <br />
                     It&apos;s ideal for field workers, customer-facing teams,
                     and mobile-heavy workflows. It&apos;s also designed with
                     accessibility in mind, enabling users with motor
@@ -182,7 +191,7 @@ const SECTIONS: Record<TypeofSection, TSection> = {
             <div>
                 <p className="text-foreground/50">
                     Memo is currently in development but will soon be available
-                    as an embeddable script or Chrome extension. We&apos;re
+                    as an embeddable script and a Chrome extension. We&apos;re
                     building a full SDK and dashboard so you can integrate voice
                     input into any form on your site or product with just a few
                     lines of code. Want early access?{" "}
@@ -205,8 +214,8 @@ const SECTIONS: Record<TypeofSection, TSection> = {
                     </li>
                     <li>
                         <strong>2.</strong> Customize your component preferences
-                        — choose prompt text, voice behavior, and optionally
-                        apply your own branding styles.
+                        — choose guidance settings, adjust field filling
+                        behavior, and optionally apply your own branding styles.
                     </li>
                     <li>
                         <strong>3.</strong> Copy a small generated script tag
