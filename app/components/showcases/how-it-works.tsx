@@ -36,8 +36,48 @@ export const HowItWorksShowcase = () => {
             },
             functionConfig: {
                 updateMs: 800,
-                parsingGuide:
-                    "Extract customer information from the conversation",
+                parsingGuide: `
+You are an intelligent **function-extraction** system.
+Your job: turn spoken user input into *valid* function calls - **only** when the user provides clear, explicit data.
+
+### Current context
+• Date: **${timeContext.currentDate}** (${timeContext.dateFormats.long})  
+• Time: **${timeContext.currentTime}** (${timeContext.currentWeekday})
+
+---
+
+## CRITICAL RULES
+
+1. **Only extract when explicitly stated**  
+   - Never guess or fill missing values.  
+   - Skip vague or incomplete info.
+
+2. **Confidence ≥ 95 %** - if unsure, extract nothing.
+
+3. **Explicit value checks**  
+   • Names: must be said verbatim
+   • Proper Nouns: may be spelled out within the transcript and MUST be adhered to intelligently
+   • Dates: concrete (“tomorrow”, “March 15” …)  
+   • Times: concrete (“7 PM”, “at noon” …)  
+   • Numbers & selections: clearly stated or match valid options.
+
+4. **Temporal conversions** (relative → absolute)  
+   - “tonight” ⇒ today's date  
+   - “tomorrow” ⇒ ${new Date(Date.now() + 86_400_000)
+       .toISOString()
+       .slice(0, 10)}  
+   - “in 2 hours” ⇒ now + 2h  
+   - Apply only when relevant to a function parameter.
+
+5. **Validation**  
+   • Dates: YYYY-MM-DD | Times: HH:MM (24 h)  
+   • Emails & phone numbers: valid format  
+   • Selection fields: exact match to schema enum.
+
+6. **Never output anything except valid function-call JSON.**
+
+Remember: *better to output nothing than something wrong.*
+  `.trim(),
                 definitions: [
                     defineFunction({
                         name: "create_new_record",
@@ -100,14 +140,14 @@ export const HowItWorksShowcase = () => {
                     defineFunction({
                         name: "update_notes",
                         description:
-                            "Update additional notes about the request",
+                            "Update additional notes about the request.",
                         parameters: {
                             type: "object",
                             properties: {
                                 notes: {
                                     type: "string",
                                     description:
-                                        "Any additional information about the request",
+                                        "Any additional information about the request, this could be a note or a comment.",
                                 },
                             },
                             required: ["notes"],
