@@ -10,7 +10,7 @@ export function PageIntro({
     className,
     centered = false,
 }: {
-    eyebrow: string;
+    eyebrow: string | JSX.Element;
     title: string | JSX.Element;
     children: React.ReactNode;
     className?: string;
@@ -25,20 +25,36 @@ export function PageIntro({
             )}
         >
             <Fader>
-                <h1>
-                    <span className="block font-display text-base font-semibold text-foreground/75">
+                {typeof eyebrow === "string" ? (
+                    <h1>
+                        <span className="block font-display text-base font-semibold text-foreground/75">
+                            {eyebrow}
+                        </span>
+                        <span className="sr-only"> - </span>
+                        <span
+                            className={clsx(
+                                "mt-4 lg:mt-6 block max-w-5xl font-display font-medium tracking-tight text-foreground [text-wrap:balance] text-3xl lg:text-6xl",
+                                centered && "mx-auto"
+                            )}
+                        >
+                            {title}
+                        </span>
+                    </h1>
+                ) : (
+                    <>
                         {eyebrow}
-                    </span>
-                    <span className="sr-only"> - </span>
-                    <span
-                        className={clsx(
-                            "mt-4 lg:mt-6 block max-w-5xl font-display font-medium tracking-tight text-foreground [text-wrap:balance] text-3xl lg:text-6xl",
-                            centered && "mx-auto"
-                        )}
-                    >
-                        {title}
-                    </span>
-                </h1>
+
+                        <h1
+                            className={clsx(
+                                "mt-4 lg:mt-6 block max-w-5xl font-display font-medium tracking-tight text-foreground [text-wrap:balance] text-3xl lg:text-6xl",
+                                centered && "mx-auto"
+                            )}
+                        >
+                            {title}
+                        </h1>
+                    </>
+                )}
+
                 <div
                     className={clsx(
                         "mt-4 lg:mt-6 max-w-3xl text-lg lg:text-xl text-foreground/50",

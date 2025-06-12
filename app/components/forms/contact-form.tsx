@@ -2,11 +2,20 @@ import { Fader } from "~/components//fader";
 import { Button } from "../ui/button";
 import { TextAreaInput, TextInput } from "./elements";
 import { ActionFunctionArgs } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
+import { useActionData, useSubmit } from "@remix-run/react";
+import { useState } from "react";
 
 type FormErrors = {
     email?: string;
     service?: string;
+};
+
+type FormData = {
+    name: string;
+    email: string;
+    company: string;
+    phone: string;
+    message: string;
 };
 
 // TODO: Form, useActionData for remix... use native form handling from remix, server validation.
@@ -14,10 +23,10 @@ type FormErrors = {
 export async function action({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
     const email = String(formData.get("email"));
-    // const company = String(formData.get("company"));
-    // const phone = String(formData.get("phone"));
-    // const message = String(formData.get("message"));
-    const service = String(formData.get("service"));
+    const name = String(formData.get("name"));
+    const company = String(formData.get("company"));
+    const phone = String(formData.get("phone"));
+    const message = String(formData.get("message"));
 
     // errs
     const errors: FormErrors = {};
@@ -27,51 +36,91 @@ export async function action({ request }: ActionFunctionArgs) {
         errors.email = "Invalid email address, must include @.";
     }
 
-    if (service.length === 0) {
-        errors.service = "Please select a service type.";
-    }
-
     // return errors before submit if they exist.
     if (Object.keys(errors).length > 0) {
         return { errors: errors };
     }
 
-    return {};
+    // TODO: Add your form submission logic here
+    console.log("Form submitted:", { name, email, company, phone, message });
+
+    return { success: true };
 }
 
 export function ContactForm() {
     const actionData = useActionData<typeof action>();
+    const submit = useSubmit();
+    const [formData, setFormData] = useState<FormData>({
+        name: "",
+        email: "",
+        company: "",
+        phone: "",
+        message: "",
+    });
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        submit(formData, { method: "post" });
+    };
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
     return (
-        <Fader>
+        <Fader data-form-container>
             <form
                 method="post"
+                onSubmit={handleSubmit}
                 className="border rounded-lg p-4 shadow bg-primary-foreground/75"
             >
                 <h2 className="font-display text-base font-semibold text-primary">
                     All Inquiries
                 </h2>
                 <div className="isolate mt-6 rounded-md -mx-2 -mb-2 p-2 focus-within:bg-primary/5 space-y-4 text-foreground/75 transition-colors duration-300">
-                    <TextInput label="Name" name="name" autoComplete="name" />
+                    <TextInput
+                        label="Name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        autoComplete="name"
+                    />
                     <TextInput
                         label="Email"
                         type="email"
                         name="email"
+                        value={formData.email}
+                        onChange={handleChange}
                         autoComplete="email"
                         error={actionData?.errors?.email || undefined}
                     />
                     <TextInput
                         label="Company"
                         name="company"
+                        value={formData.company}
+                        onChange={handleChange}
                         autoComplete="organization"
                     />
                     <TextInput
                         label="Phone"
                         type="tel"
                         name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
                         autoComplete="tel"
                     />
-                    <TextAreaInput label="Message" name="message" />
+                    <TextAreaInput
+                        label="Message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                    />
                 </div>
                 <Button type="submit" className="mt-10 group rounded-full">
                     <span className="flex items-center">

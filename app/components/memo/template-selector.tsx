@@ -51,7 +51,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     };
 
     return (
-        <div className="flex md:flex-row flex-col gap-y-4 md:items-center justify-between p-2 bg-primary-foreground/75 rounded-lg">
+        <div className="flex md:flex-row flex-col gap-y-4 md:items-center justify-between p-4 bg-primary-foreground/75 rounded-lg border">
             <div className="flex md:flex-row flex-col md:items-center gap-4">
                 <Sparkles className="w-4 h-4 text-foreground/75" />
                 <div>

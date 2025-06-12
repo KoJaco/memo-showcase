@@ -1,58 +1,97 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Button } from "~/components/ui/button";
-import { Mic, MicOff, Settings, Wifi, WifiOff } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
 import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
+import {
+    Mic,
+    MicOff,
+    Settings,
+    Wifi,
+    WifiOff,
+    ChevronRight,
+    ChevronLeft,
+    ChevronsLeft,
+    ChevronsRight,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface FloatingRecordingButtonProps {
-    status: "connected" | "connecting" | "disconnected" | "error";
+interface FloatingRecordingMenuProps {
+    status: "connected" | "disconnected" | "connecting" | "error";
     isRecording: boolean;
     handleRecording: () => void;
     handleConnect: () => void;
     handleDisconnect: () => void;
 }
 
-export const FloatingRecordingButton: React.FC<
-    FloatingRecordingButtonProps
-> = ({
+export const FloatingRecordingMenu: React.FC<FloatingRecordingMenuProps> = ({
     status,
     isRecording,
     handleRecording,
     handleConnect,
     handleDisconnect,
 }) => {
-    const [isVisible, setIsVisible] = useState(true);
-    const observerRef = useRef<IntersectionObserver | null>(null);
-    const formRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    const updateVisibility = useCallback(
+        (visible: boolean) => {
+            if (visible !== isVisible) {
+                setIsAnimating(true);
+                setIsVisible(visible);
+                // Remove animating class after animation completes
+                setTimeout(() => setIsAnimating(false), 300);
+            }
+        },
+        [isVisible]
+    );
 
     useEffect(() => {
-        // Create intersection observer
-        observerRef.current = new IntersectionObserver(
-            ([entry]) => {
-                // Only update visibility if we've scrolled
-                if (window.scrollY > 0) {
-                    setIsVisible(entry.isIntersecting);
+        let timeoutId: NodeJS.Timeout;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                // Clear any pending timeout
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
                 }
+
+                // Check if any form is visible
+                const isFormVisible = entries.some(
+                    (entry) =>
+                        entry.isIntersecting && entry.intersectionRatio > 0.1
+                );
+
+                // Debounce the visibility update
+                timeoutId = setTimeout(() => {
+                    updateVisibility(isFormVisible);
+                }, 100);
             },
             {
-                threshold: 0.1, // Show button when at least 10% of the form is visible
-                rootMargin: "0px 0px -100px 0px", // Add some margin to the bottom
+                threshold: 0.1,
+                rootMargin: "0px",
             }
         );
 
-        // Start observing the form
-        const formElement = document.querySelector("[data-form-container]");
-        if (formElement) {
-            observerRef.current.observe(formElement);
+        // Find all forms in the document
+        const forms = document.querySelectorAll("form, [data-form-container]");
+
+        // If no forms are found, show the menu by default
+        if (forms.length === 0) {
+            updateVisibility(true);
+            return;
         }
 
-        // Cleanup
+        // Observe all forms
+        forms.forEach((form) => observer.observe(form));
+
         return () => {
-            if (observerRef.current) {
-                observerRef.current.disconnect();
+            if (timeoutId) {
+                clearTimeout(timeoutId);
             }
+            forms.forEach((form) => observer.unobserve(form));
+            observer.disconnect();
         };
-    }, []);
+    }, [updateVisibility]);
 
     const getConnectionIcon = () => {
         switch (status) {
@@ -68,11 +107,14 @@ export const FloatingRecordingButton: React.FC<
     };
 
     const buttonBaseStyles =
-        "hover:bg-primary-foreground/10 lg:hover:bg-primary/10 hover:scale-110 hover:text-primary-foreground lg:hover:text-primary transition-all duration-300 h-10 w-10 rounded-full";
+        "hover:bg-primary/10 hover:scale-110 hover:text-primary transition-all duration-300 h-10 w-10 rounded-full";
+
+    if (!isVisible && !isAnimating) return null;
 
     return (
         <AnimatePresence>
-            {isVisible && (
+            {/* Not collapsed */}
+            {isVisible && !isCollapsed && (
                 <motion.div
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -82,7 +124,9 @@ export const FloatingRecordingButton: React.FC<
                         stiffness: 300,
                         damping: 30,
                     }}
-                    className="fixed right-6 lg:right-8 bottom-6 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 z-50 flex flex-col bg-primary text-primary-foreground lg:bg-primary-foreground lg:text-primary rounded-full px-1 py-2 border border-primary/20"
+                    className={cn(
+                        "fixed z-50 right-6 lg:right-8 top-1/2 -translate-y-1/2 flex flex-col bg-primary-foreground text-primary rounded-full px-1 py-2 border border-primary/20"
+                    )}
                 >
                     <div className="flex flex-col items-center gap-2">
                         {/* Settings Button */}
@@ -97,6 +141,22 @@ export const FloatingRecordingButton: React.FC<
                                 className={buttonBaseStyles}
                             >
                                 <Settings className="w-4 h-4" />
+                            </Button>
+                        </motion.div>
+
+                        {/* Hide/Show Button */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                        >
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setIsCollapsed(!isCollapsed)}
+                                className={buttonBaseStyles}
+                            >
+                                <ChevronsRight className="w-4 h-4" />
                             </Button>
                         </motion.div>
 
@@ -184,6 +244,28 @@ export const FloatingRecordingButton: React.FC<
                             </Button>
                         </motion.div>
                     </div>
+                </motion.div>
+            )}
+
+            {/* Collapsed */}
+            {isVisible && isCollapsed && (
+                <motion.div
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 100 }}
+                    transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                    }}
+                    className="fixed z-50 right-0 bottom-auto top-1/2 -translate-y-1/2 flex flex-col bg-primary text-primary-foreground rounded-l-lg"
+                >
+                    <button
+                        onClick={() => setIsCollapsed(false)}
+                        className="flex h-full my-auto min-h-[80px] items-center"
+                    >
+                        <ChevronsLeft className="h-4 w-4" />
+                    </button>
                 </motion.div>
             )}
         </AnimatePresence>

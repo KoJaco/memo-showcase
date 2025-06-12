@@ -806,12 +806,277 @@ const productReviewTemplate: Template = {
     ],
 };
 
+// Field Service Report Template
+const fieldServiceReportTemplate: Template = {
+    id: nanoid(8),
+    name: "Field Service Report",
+    description:
+        "For documenting field service visits, maintenance work, and on-site repairs",
+    fields: [
+        {
+            id: "arg_customer_name",
+            identifier: "customer_name",
+            name: "Customer Name",
+            label: "Customer Name",
+            type: "text",
+            required: true,
+            description: "Name of the customer or business",
+        },
+        {
+            id: "arg_service_date",
+            identifier: "service_date",
+            name: "Service Date",
+            label: "Service Date",
+            type: "date",
+            required: true,
+            description: "Date of the service visit",
+        },
+        {
+            id: "arg_service_type",
+            identifier: "service_type",
+            name: "Service Type",
+            label: "Service Type",
+            type: "select",
+            required: true,
+            description: "Type of service performed",
+            options: [
+                "Installation",
+                "Maintenance",
+                "Repair",
+                "Inspection",
+                "Emergency Service",
+                "Training",
+                "Upgrade",
+            ],
+        },
+        {
+            id: "arg_equipment_details",
+            identifier: "equipment_details",
+            name: "Equipment Details",
+            label: "Equipment Details",
+            type: "textarea",
+            required: true,
+            description: "Description of equipment serviced",
+        },
+        {
+            id: "arg_work_performed",
+            identifier: "work_performed",
+            name: "Work Performed",
+            label: "Work Performed",
+            type: "textarea",
+            required: true,
+            description: "Detailed description of work completed",
+        },
+        {
+            id: "arg_parts_used",
+            identifier: "parts_used",
+            name: "Parts Used",
+            label: "Parts Used",
+            type: "textarea",
+            required: false,
+            description: "List of parts replaced or used",
+        },
+        {
+            id: "arg_technician_name",
+            identifier: "technician_name",
+            name: "Technician Name",
+            label: "Technician Name",
+            type: "text",
+            required: true,
+            description: "Name of the technician who performed the service",
+        },
+        {
+            id: "arg_customer_signature",
+            identifier: "customer_signature",
+            name: "Customer Signature",
+            label: "Customer Signature Required",
+            type: "checkbox",
+            required: true,
+            description: "Confirmation of customer approval",
+        },
+    ],
+};
+
+// EMR Template
+const emrTemplate: Template = {
+    id: nanoid(8),
+    name: "Electronic Medical Record",
+    description: "For documenting patient visits and medical records",
+    fields: [
+        {
+            id: "arg_patient_name",
+            identifier: "patient_name",
+            name: "Patient Name",
+            label: "Patient Name",
+            type: "text",
+            required: true,
+            description: "Full name of the patient",
+        },
+        {
+            id: "arg_visit_date",
+            identifier: "visit_date",
+            name: "Visit Date",
+            label: "Visit Date",
+            type: "date",
+            required: true,
+            description: "Date of the medical visit",
+        },
+        {
+            id: "arg_chief_complaint",
+            identifier: "chief_complaint",
+            name: "Chief Complaint",
+            label: "Chief Complaint",
+            type: "textarea",
+            required: true,
+            description: "Patient's main reason for visit",
+        },
+        {
+            id: "arg_vital_signs",
+            identifier: "vital_signs",
+            name: "Vital Signs",
+            label: "Vital Signs",
+            type: "textarea",
+            required: true,
+            description: "Patient's vital signs (BP, HR, Temp, etc.)",
+        },
+        {
+            id: "arg_assessment",
+            identifier: "assessment",
+            name: "Assessment",
+            label: "Assessment",
+            type: "textarea",
+            required: true,
+            description: "Doctor's assessment and diagnosis",
+        },
+        {
+            id: "arg_treatment_plan",
+            identifier: "treatment_plan",
+            name: "Treatment Plan",
+            label: "Treatment Plan",
+            type: "textarea",
+            required: true,
+            description: "Prescribed treatment and follow-up plan",
+        },
+        {
+            id: "arg_medications",
+            identifier: "medications",
+            name: "Medications",
+            label: "Medications",
+            type: "textarea",
+            required: false,
+            description: "Prescribed medications and dosages",
+        },
+        {
+            id: "arg_provider_name",
+            identifier: "provider_name",
+            name: "Provider Name",
+            label: "Provider Name",
+            type: "text",
+            required: true,
+            description: "Name of the healthcare provider",
+        },
+    ],
+};
+
+// Insurance Claim Template
+const insuranceClaimTemplate: Template = {
+    id: nanoid(8),
+    name: "Insurance Claim",
+    description: "For documenting insurance claims and incident reports",
+    fields: [
+        {
+            id: "arg_policy_holder",
+            identifier: "policy_holder",
+            name: "Policy Holder",
+            label: "Policy Holder Name",
+            type: "text",
+            required: true,
+            description: "Name of the policy holder",
+        },
+        {
+            id: "arg_policy_number",
+            identifier: "policy_number",
+            name: "Policy Number",
+            label: "Policy Number",
+            type: "text",
+            required: true,
+            description: "Insurance policy number",
+        },
+        {
+            id: "arg_incident_date",
+            identifier: "incident_date",
+            name: "Incident Date",
+            label: "Incident Date",
+            type: "date",
+            required: true,
+            description: "Date of the incident",
+        },
+        {
+            id: "arg_claim_type",
+            identifier: "claim_type",
+            name: "Claim Type",
+            label: "Claim Type",
+            type: "select",
+            required: true,
+            description: "Type of insurance claim",
+            options: [
+                "Property Damage",
+                "Auto Accident",
+                "Medical",
+                "Liability",
+                "Natural Disaster",
+                "Theft",
+                "Other",
+            ],
+        },
+        {
+            id: "arg_incident_description",
+            identifier: "incident_description",
+            name: "Incident Description",
+            label: "Incident Description",
+            type: "textarea",
+            required: true,
+            description: "Detailed description of the incident",
+        },
+        {
+            id: "arg_damage_estimate",
+            identifier: "damage_estimate",
+            name: "Damage Estimate",
+            label: "Damage Estimate",
+            type: "text",
+            required: false,
+            description: "Estimated cost of damages",
+        },
+        {
+            id: "arg_witnesses",
+            identifier: "witnesses",
+            name: "Witnesses",
+            label: "Witnesses",
+            type: "textarea",
+            required: false,
+            description: "Names and contact information of witnesses",
+        },
+        {
+            id: "arg_additional_documents",
+            identifier: "additional_documents",
+            name: "Additional Documents",
+            label: "Additional Documents",
+            type: "textarea",
+            required: false,
+            description: "List of attached documents and evidence",
+        },
+    ],
+};
+
 // Add the new templates to the templates array
 export const templates: Template[] = [
     ...DEFAULT_TEMPLATES,
     contactInfoTemplate,
     meetingNotesTemplate,
     productReviewTemplate,
+    fieldServiceReportTemplate,
+    emrTemplate,
+    insuranceClaimTemplate,
 ];
 
 // Template management functions
@@ -821,7 +1086,7 @@ export const initializeTemplates = () => {
     // Always use the default templates as read-only constants
     // Store them in localStorage for consistency but don't allow editing
     const existingTemplates = localStorage.getItem(TEMPLATES_STORAGE_KEY);
-    console.log("🔍 Existing templates from localStorage:", existingTemplates);
+    // console.log("🔍 Existing templates from localStorage:", existingTemplates);
 
     if (!existingTemplates) {
         console.log("📝 No existing templates, creating new ones");
@@ -835,13 +1100,13 @@ export const initializeTemplates = () => {
             JSON.stringify(templateData)
         );
         console.log("✅ Saved default templates to localStorage");
-        console.log("🎯 Returning DEFAULT_TEMPLATES:", templates[0]?.fields[0]);
+        // console.log("🎯 Returning DEFAULT_TEMPLATES:", templates[0]?.fields[0]);
         return templates;
     }
 
     try {
         const templateData = JSON.parse(existingTemplates);
-        console.log("📋 Parsed template data:", templateData);
+        // console.log("📋 Parsed template data:", templateData);
 
         // If the stored data doesn't have the expected structure, reset it
         if (!templateData.templates || !Array.isArray(templateData.templates)) {
@@ -857,10 +1122,7 @@ export const initializeTemplates = () => {
             );
             return DEFAULT_TEMPLATES;
         }
-        console.log(
-            "🎯 Returning stored templates:",
-            templateData.templates[0]?.fields[0]
-        );
+
         return templateData.templates;
     } catch (error) {
         console.log("❌ Error parsing templates:", error);

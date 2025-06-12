@@ -123,7 +123,10 @@ export interface FunctionDraftDataReceived {
     args: { [key: string]: any };
 
     similarityScore: number; // <= similarity_score
-    status: "pending_confirmation" | string;
+    status:
+        | "pending_confirmation"
+        | "confirmed_by_llm"
+        | "awaiting_potential_update";
     timestamp: string;
 }
 export interface TranscriptMsg {
@@ -306,8 +309,16 @@ export class MemonicSDK {
 
     private onWsOpen() {
         this.setStatus("connected");
-        const payload = convertKeysToSnakeCase({ type: "config", ...this.cfg });
-        this.ws?.send(JSON.stringify(payload));
+        // Wait for the next tick to ensure WebSocket is fully ready
+        setTimeout(() => {
+            if (this.ws?.readyState === WebSocket.OPEN) {
+                const payload = convertKeysToSnakeCase({
+                    type: "config",
+                    ...this.cfg,
+                });
+                this.ws.send(JSON.stringify(payload));
+            }
+        }, 0);
     }
 
     private emitErr(e: Error) {
@@ -341,6 +352,7 @@ export class MemonicSDK {
                 this.onFuncs?.(msg.functions);
                 break;
             case "function_draft_extracted":
+                // console.log("DRAFT RECEIVED IN SDK:: ", msg.draftFunction);
                 this.onDraft?.(msg.draftFunction);
                 break;
             case "session_end":
@@ -437,8 +449,14 @@ export class FunctionDraftManager {
             (d) => d.draftId === data.draftId || d.name === data.name
         );
 
-        // 1️⃣ already confirmed? --> ignore new pending version
+        // 1️⃣ already confirmed? --> set status to awaiting_potential_update
         if (idx !== -1 && this.drafts[idx].status === "confirmed_by_llm") {
+            const incoming: FunctionDraftDataReceived = {
+                ...data,
+                status: "awaiting_potential_update",
+            };
+            this.drafts[idx] = incoming;
+            this.sortAndClean();
             return [...this.drafts];
         }
 

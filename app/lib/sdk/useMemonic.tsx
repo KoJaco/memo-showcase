@@ -76,6 +76,7 @@ export function useMemonic({ config, manager }: UseMemonicOpts) {
             setDrafts(upd);
         };
         sdk.onDraft = (d) => {
+            // console.log("DRAFT RECEIVED IN MEMONIC:: ", d);
             const upd = mgrRef.current.newDraft(d);
             setDrafts(upd);
         };

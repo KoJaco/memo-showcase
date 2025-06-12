@@ -15,7 +15,7 @@ export function SectionIntro({
     "title" | "children"
 > & {
     title: string | JSX.Element;
-    eyebrow?: string;
+    eyebrow?: string | JSX.Element;
     children?: React.ReactNode;
     smaller?: boolean;
     invert?: boolean;
@@ -24,7 +24,7 @@ export function SectionIntro({
         <Container {...props}>
             <Fader className="max-w-3xl">
                 <h2>
-                    {eyebrow && (
+                    {eyebrow && typeof eyebrow === "string" && (
                         <>
                             <span
                                 className={clsx(
@@ -39,6 +39,9 @@ export function SectionIntro({
                             <span className="sr-only"> - </span>
                         </>
                     )}
+
+                    {eyebrow && typeof eyebrow !== "string" && eyebrow}
+
                     <span
                         className={clsx(
                             "block font-display tracking-tight [text-wrap:balance] capitalize",

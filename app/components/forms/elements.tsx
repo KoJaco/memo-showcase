@@ -50,9 +50,10 @@ export const TextInput = forwardRef<
                     className={cn(
                         isDraft &&
                             "opacity-50 rounded-[2px] p-2 border border-foreground pr-8",
-                        "w-full bg-transparent border-b border-foreground/20 focus:border-foreground focus:outline-none py-1 text-foreground/75 transition-all duration-100 text-base  placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus:visible:ring-ring disabled:cursor-not-allowed disabled:opacity-75 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus:ring-foreground/50 focus-visible:border-b-0 focus-visible:rounded-[2px] focus-visible:p-2",
+                        "w-full bg-transparent border-b border-foreground/20 focus:border-foreground focus:outline-none py-1 text-foreground/75 transition-all duration-100 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus:visible:ring-ring disabled:cursor-not-allowed disabled:opacity-75 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus:ring-foreground/50 focus-visible:border-b-0 focus-visible:rounded-[2px] focus-visible:p-2",
                         error && "border-destructive"
                     )}
+                    readOnly={false}
                 />
                 {isDraft && <Loader />}
             </div>
@@ -90,9 +91,10 @@ export const TextAreaInput = forwardRef<
                     className={cn(
                         isDraft &&
                             "opacity-50 rounded-[2px] p-2 border border-foreground pr-8",
-                        "w-full bg-transparent border-b border-foreground/20 min-h-[80px] focus:border-foreground focus:outline-none py-1  text-foreground/75 transition-all duration-100 text-base  placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus:visible:ring-ring disabled:cursor-not-allowed disabled:opacity-75 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus:ring-foreground/50 focus-visible:border-b-0 focus-visible:rounded-[2px] focus-visible:p-2",
+                        "w-full bg-transparent border-b border-foreground/20 min-h-[80px] focus:border-foreground focus:outline-none py-1 text-foreground/75 transition-all duration-100 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus:visible:ring-ring disabled:cursor-not-allowed disabled:opacity-75 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus:ring-foreground/50 focus-visible:border-b-0 focus-visible:rounded-[2px] focus-visible:p-2",
                         error && "border-destructive"
                     )}
+                    readOnly={false}
                 />
                 {isDraft && <Loader />}
             </div>

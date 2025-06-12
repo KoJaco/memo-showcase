@@ -1,9 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useCallback } from "react";
-import ConnectionIndicator from "./connection-indicator";
-import RecordingButton from "./recording-button";
-import { Button } from "~/components/ui/button";
+import { useMemo, useState, useEffect, useCallback } from "react";
 
 import { useMemonic } from "~/lib/sdk/useMemonic";
 import {
@@ -16,20 +13,12 @@ import {
     generateFunctionParsingGuide,
     generateTimeContext,
 } from "~/lib/llm-context";
-import { nanoid } from "nanoid";
-
-import { Code, Plus, Edit2, Trash2, X } from "lucide-react";
 
 // Import our extracted components and utilities
 import { TranscriptObject, FormField, Template } from "./types";
-import {
-    initializeTemplates,
-    getTemplates,
-    deleteTemplateFromStorage,
-} from "./templates";
-import { formatDuration } from "./utils";
+import { initializeTemplates } from "./templates";
+
 import { TemplateSelector } from "./template-selector";
-import { cn } from "~/lib/utils";
 
 import {
     TextInput,
@@ -39,7 +28,8 @@ import {
     SelectInput,
 } from "~/components/forms/elements";
 
-import { FloatingRecordingButton } from "./floating-recording-button";
+import { FloatingRecordingMenu } from "./floating-recording-menu";
+import { cn } from "~/lib/utils";
 
 // Add utility function after the imports and before the Demo component
 const camelCaseToReadable = (str: string): string => {
@@ -159,6 +149,11 @@ const Memo = () => {
 
     // Recording handlers
     const handleRecording = () => {
+        if (connectionStatus !== "connected") {
+            console.warn("Cannot start recording: WebSocket not connected");
+            return;
+        }
+
         if (isRecording) {
             // console.log(
             //     "🎙️ Stopping recording, keeping recordingStartTime:",
@@ -403,7 +398,7 @@ const Memo = () => {
 
     // console.log(transcriptFinal);
 
-    // console.log("DRAFT PICKED: ", drafts);
+    // console.log("DRAFTS PICKED: ", drafts);
 
     // Effects for tracking metrics
     useEffect(() => {
@@ -593,29 +588,46 @@ const Memo = () => {
             console.log("📝 Processing drafts:", drafts);
 
             drafts.forEach((draft) => {
-                if (draft.status === "pending_confirmation") {
+                if (
+                    draft.status === "pending_confirmation" ||
+                    draft.status === "awaiting_potential_update"
+                ) {
                     const functionIdentifier = draft.name.replace(
                         "update_",
                         ""
                     );
+                    console.log(
+                        `🔍 Draft function name: ${draft.name}, identifier: ${functionIdentifier}, status: ${draft.status}`
+                    );
                     const field = formData.fields.find(
                         (f) => f.identifier === functionIdentifier
                     );
-
                     if (field) {
-                        const args = { ...draft.args };
-                        delete args.id;
-                        const value = Object.values(args)[0];
-                        if (value !== undefined) {
-                            setFormValues((prev) => ({
-                                ...prev,
-                                [field.identifier]: value,
-                            }));
-                            setIsDraft((prev) => ({
-                                ...prev,
-                                [field.identifier]: true,
-                            }));
+                        // Always set isDraft to true for both pending and awaiting states
+                        setIsDraft((prev) => ({
+                            ...prev,
+                            [field.identifier]: true,
+                        }));
+                        // Only insert args if status is pending_confirmation
+                        if (draft.status === "pending_confirmation") {
+                            const args = { ...draft.args };
+                            delete args.id;
+                            const value = Object.values(args)[0];
+                            console.log(
+                                `💡 Matched field: ${field.identifier}, value:`,
+                                value
+                            );
+                            if (value !== undefined) {
+                                setFormValues((prev) => ({
+                                    ...prev,
+                                    [field.identifier]: value,
+                                }));
+                            }
                         }
+                    } else {
+                        console.warn(
+                            `❌ No matching field for draft identifier: ${functionIdentifier}`
+                        );
                     }
                 }
             });
@@ -644,7 +656,12 @@ const Memo = () => {
                 {/* Current Form */}
                 {formData.fields.length > 0 && (
                     <div
-                        className="bg-primary-foreground/75 rounded-lg p-2"
+                        className={cn(
+                            "bg-primary-foreground/75 rounded-lg p-4 transition-all duration-300",
+                            isRecording
+                                ? "border-2 border-foreground/50"
+                                : "border"
+                        )}
                         data-form-container
                     >
                         <div className="space-y-6">
@@ -655,12 +672,12 @@ const Memo = () => {
                                     const isFieldDraft =
                                         isDraft[field.identifier];
 
-                                    // console.log("🎯 Rendering field:", {
-                                    //     identifier: field.identifier,
-                                    //     value: currentValue,
-                                    //     type: field.type,
-                                    //     isDraft: isFieldDraft,
-                                    // });
+                                    // console.log(
+                                    //     `🎯 Rendering field: ${field.identifier}, value:`,
+                                    //     currentValue,
+                                    //     `type: ${field.type}, isDraft:`,
+                                    //     isFieldDraft
+                                    // );
 
                                     switch (field.type) {
                                         case "text":
@@ -852,7 +869,7 @@ const Memo = () => {
                 )}
 
                 {/* Floating Recording Button */}
-                <FloatingRecordingButton
+                <FloatingRecordingMenu
                     status={connectionStatus}
                     isRecording={isRecording}
                     handleRecording={handleRecording}

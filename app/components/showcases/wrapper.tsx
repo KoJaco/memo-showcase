@@ -4,7 +4,7 @@ type Props = {
 
 const Wrapper = ({ children }: Props) => {
     return (
-        <div className="w-full min-h-[400px] bg-primary-foreground/10 rounded-lg items-center justify-center flex border p-2">
+        <div className="w-full min-h-[400px] bg-primary-foreground/10 rounded-lg items-center justify-center flex">
             {children}
         </div>
     );

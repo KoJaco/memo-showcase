@@ -7,7 +7,7 @@ import { Fader, FaderStagger } from "~/components//fader";
 import BackgroundStatic from "~/components/background-static";
 import { PageIntro } from "~/components/sections/page-intro";
 import { SectionIntro } from "~/components/sections/section-intro";
-import { FullShowcase } from "~/components/showcases";
+import { FullShowcase, HowItWorksShowcase } from "~/components/showcases";
 import { Badge } from "~/components/ui/badge";
 import {
     Carousel,
@@ -40,7 +40,7 @@ type TypeofSection = "demo" | "why" | "how" | "who-its-for" | "whats-next";
 type TSection = {
     id: TypeofSection;
     title: string | JSX.Element;
-    eyebrow: string;
+    eyebrow: string | JSX.Element;
     body: string | JSX.Element;
     image?: { src: string; aspect: number };
 };
@@ -95,20 +95,9 @@ const SECTIONS: Record<TypeofSection, TSection> = {
     how: {
         id: "how",
         title: "How it works",
-        eyebrow: "Voice → Intent → Structured Output",
-        body: (
-            <div>
-                <p className="text-foreground/50">
-                    Memo listens to your voice and converts it into structured
-                    actions in real time. It uses high-accuracy speech
-                    recognition combined with the Memonic engine — a natural
-                    language parser built to understand context, extract intent,
-                    and map spoken instructions directly to structured output.
-                    Whether you&apos;re saying &apos;Set budget to 500&apos; or
-                    &apos;Name is Jess, message: follow up Monday&apos;, Memo
-                    fills the form instantly, no training required.
-                </p>
-                <Badge className="text-sm mt-4 text-background/75 hover:text-primary-foreground/75 rounded-full px-4 bg-foreground transition-colors duration-300 hover:bg-primary group/badge">
+        eyebrow: (
+            <div className="flex flex-col items-start justify-between gap-y-4 mb-6">
+                <Badge className="text-sm text-background/75 hover:text-primary-foreground/75 rounded-full px-4 bg-foreground transition-colors duration-300 hover:bg-primary group/badge">
                     Powered by{" "}
                     <a
                         href="https://memonic.vercel.app/"
@@ -120,6 +109,24 @@ const SECTIONS: Record<TypeofSection, TSection> = {
                     </a>
                     <ExternalLink className="ml-2 w-4 h-4" />
                 </Badge>
+                <span>Voice → Intent → Structured Output,</span>
+            </div>
+        ),
+        body: (
+            <div>
+                <p className="text-foreground/50 mt-4">
+                    Memo listens to your voice and converts it into structured
+                    actions in real time. It uses high-accuracy speech
+                    recognition combined with the Memonic engine — a natural
+                    language parser built to understand context, extract intent,
+                    and map spoken instructions directly to structured output.
+                    Whether you&apos;re saying &apos;Set budget to 500&apos; or
+                    &apos;Name is Jess, message: follow up Monday&apos;, Memo
+                    fills the form instantly, no training required.
+                </p>
+                <div className="mt-8">
+                    <HowItWorksShowcase />
+                </div>
             </div>
         ),
     },
@@ -154,7 +161,7 @@ const SECTIONS: Record<TypeofSection, TSection> = {
                                         // "sm:basis-1/2",
                                         item.widthMult == 1
                                             ? "max-w-[300px]"
-                                            : "max-w-[444px]"
+                                            : "max-w-[442px]"
                                     )}
                                 >
                                     <div
@@ -166,7 +173,12 @@ const SECTIONS: Record<TypeofSection, TSection> = {
                                         <img
                                             src={item.src}
                                             alt=""
-                                            className="aspect-4/5 group-hover/img:scale-105 transition-transform duration-500 "
+                                            className={cn(
+                                                "group-hover/img:scale-105 transition-transform duration-500 ",
+                                                item.widthMult == 1
+                                                    ? "aspect-4/5"
+                                                    : "h-[426px] sm:h-full aspect-square"
+                                            )}
                                         />
                                     </div>
                                 </CarouselItem>
@@ -468,12 +480,24 @@ function HeaderSection({
             id={section.id}
             className="w-full max-w-xl mx-auto scroll-mt-20 bg-transparent h-full"
         >
-            <PageIntro eyebrow={section.eyebrow} title={section.title}>
+            <PageIntro
+                eyebrow={
+                    typeof section.eyebrow === "string"
+                        ? `${section.eyebrow}`
+                        : section.eyebrow
+                }
+                title={section.title}
+            >
                 <p>
                     Typing on mobile is slow, clumsy, and frustrating. Memo lets
                     you fill out any online form using your voice —
                     intelligently mapping natural language to structured fields
                     in real time. No extensions, no training, just speak.
+                    <br />
+                    <br />
+                    Select a form from the examples provided below and then use
+                    the floating menu on the right of the screen to fill it out.
+                    Easy as that!
                 </p>
             </PageIntro>
             <Container className="mt-12">
@@ -512,7 +536,11 @@ function BodySection({
         >
             <div className="min-h-[600px] max-w-xl text-left w-full mx-auto">
                 <SectionIntro
-                    eyebrow={`${section.eyebrow}`}
+                    eyebrow={
+                        typeof section.eyebrow === "string"
+                            ? `${section.eyebrow}`
+                            : section.eyebrow
+                    }
                     title={section.title}
                 />
                 <Container className="mt-8">
