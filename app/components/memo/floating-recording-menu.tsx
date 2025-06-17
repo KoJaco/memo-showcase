@@ -4,15 +4,14 @@ import { Button } from "~/components/ui/button";
 import {
     Mic,
     MicOff,
-    Settings,
+    Info,
     Wifi,
     WifiOff,
-    ChevronRight,
-    ChevronLeft,
     ChevronsLeft,
     ChevronsRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { InfoDialog } from "~/components/ui/info-dialog";
 
 interface FloatingRecordingMenuProps {
     status: "connected" | "disconnected" | "connecting" | "error";
@@ -32,6 +31,7 @@ export const FloatingRecordingMenu: React.FC<FloatingRecordingMenuProps> = ({
     const [isVisible, setIsVisible] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isInfoOpen, setIsInfoOpen] = useState(false);
 
     const updateVisibility = useCallback(
         (visible: boolean) => {
@@ -129,7 +129,7 @@ export const FloatingRecordingMenu: React.FC<FloatingRecordingMenuProps> = ({
                     )}
                 >
                     <div className="flex flex-col items-center gap-2">
-                        {/* Settings Button */}
+                        {/* Info Button */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -138,9 +138,10 @@ export const FloatingRecordingMenu: React.FC<FloatingRecordingMenuProps> = ({
                             <Button
                                 size="icon"
                                 variant="ghost"
+                                onClick={() => setIsInfoOpen(true)}
                                 className={buttonBaseStyles}
                             >
-                                <Settings className="w-4 h-4" />
+                                <Info className="w-4 h-4" />
                             </Button>
                         </motion.div>
 
@@ -268,6 +269,9 @@ export const FloatingRecordingMenu: React.FC<FloatingRecordingMenuProps> = ({
                     </button>
                 </motion.div>
             )}
+
+            {/* Info Dialog */}
+            <InfoDialog open={isInfoOpen} onOpenChange={setIsInfoOpen} />
         </AnimatePresence>
     );
 };

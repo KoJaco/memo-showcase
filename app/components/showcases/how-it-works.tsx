@@ -1,15 +1,126 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { TranscriptTimeline } from "./transcript-timeline";
 import { useMemonic } from "~/lib/sdk/useMemonic";
-import { nanoid } from "nanoid";
 import { ShowcaseFloatingMenu } from "./showcase-floating-menu";
 import { generateTimeContext } from "~/lib/llm-context";
-import {
-    ClientConfig,
-    defineFunction,
-    FunctionDraftDataReceived,
-} from "~/lib/sdk/index";
+import { ClientConfig, defineFunction } from "~/lib/sdk/index";
 import { Transcript } from "~/lib/sdk/types";
+import { Sparkles } from "lucide-react";
+import { Button } from "../ui/button";
+
+const scripts: JSX.Element[] = [
+    <>
+        {" "}
+        <span className="font-medium text-foreground/50">
+            &quot;I need to record something for a guy named{" "}
+            <span className="text-primary">Daryl Bennett</span> make it a{" "}
+            <span className="text-primary">low priority</span> — he&apos;s just{" "}
+            <span className="text-primary">
+                {" "}
+                asking if we received his previous email
+            </span>
+            . &quot;
+        </span>
+    </>,
+    <>
+        {" "}
+        <span className="font-medium text-foreground/50">
+            &quot;I need to{" "}
+            <span className="text-primary">create a new record</span> for the
+            customer <span className="text-primary">John Smith. </span>
+            The priority for the request is{" "}
+            <span className="text-primary">urgent</span> and he mentioned he
+            needs{" "}
+            <span className="text-primary">
+                immediate assistance with his account.
+            </span>
+            &quot;
+        </span>
+    </>,
+    <>
+        {" "}
+        <span className="font-medium text-foreground/50">
+            &quot;Can you jot down a new case for Benjamin Ross{" "}
+            <span className="text-primary">Benjamin Ross</span>? I&apos;d say{" "}
+            <span className="text-primary">medium urgency</span>. He&apos;s just
+            <span className="text-primary">
+                {" "}
+                looking for clarification on his latest invoice
+            </span>
+            . &quot;
+        </span>
+    </>,
+    <>
+        {" "}
+        <span className="font-medium text-foreground/50">
+            <span className="text-primary">Schedule a follow-up</span> for{" "}
+            <span className="text-primary">Alice Parker</span>
+            <span className="text-primary"> next Thursday</span> by{" "}
+            <span className="text-primary">phone</span>. Just{" "}
+            <span className="text-primary">check in on her onboarding</span>.
+            &quot;
+        </span>
+    </>,
+    <>
+        <span className="font-medium text-foreground/50">
+            &quot;Hi, I just spoke with{" "}
+            <span className="text-primary">Anna Reynolds</span> — she&apos;s a{" "}
+            <span className="text-primary">new client</span>, so please{" "}
+            <span className="text-primary">create a record</span> for her. She
+            mentioned her issue is <span className="text-primary">urgent</span>{" "}
+            and{" "}
+            <span className="text-primary">needs a technician out today</span>.
+            Also, <span className="text-primary">update her phone number</span>{" "}
+            to <span className="text-primary">0432 123 456</span> since she said
+            the one we have on file is outdated. Lastly,{" "}
+            <span className="text-primary">schedule a follow-up</span> call with
+            her for <span className="text-primary">two days from now</span> to{" "}
+            <span className="text-primary">
+                make sure everything&apos;s sorted
+            </span>
+            .&quot;
+        </span>
+    </>,
+    <>
+        <span className="font-medium text-foreground/50">
+            &quot;I&apos;ve just been on site with{" "}
+            <span className="text-primary">Rachel Tan</span>.{" "}
+            <span className="text-primary">Go ahead and log a new record</span>{" "}
+            — the situation is <span className="text-primary">urgent</span>.{" "}
+            <span className="text-primary">
+                She&apos;s got a network outage and needs someone by tonight
+            </span>
+            . Also, <span className="text-primary">update her notes field</span>{" "}
+            to include that{" "}
+            <span className="text-primary">
+                she&apos;s requested weekend support
+            </span>
+            . And please{" "}
+            <span className="text-primary">schedule an SMS follow-up</span> for
+            her on <span className="text-primary">Sunday</span>.&quot;
+        </span>
+    </>,
+    <>
+        <span className="font-medium text-foreground/50">
+            &quot;Can you{" "}
+            <span className="text-primary">create a new entry</span> for{" "}
+            <span className="text-primary">Mark Jennings</span>? It&apos;s{" "}
+            <span className="text-primary">high priority</span> —{" "}
+            <span className="text-primary">
+                he&apos;s reporting inconsistent billing across the last three
+                months
+            </span>
+            . Also, <span className="text-primary">set a reminder</span> to{" "}
+            <span className="text-primary">call him back on Monday</span> and{" "}
+            <span className="text-primary">
+                double-check his payment history
+            </span>{" "}
+            in the meantime. He prefers{" "}
+            <span className="text-primary">email follow-up</span>, just so you
+            know.&quot;
+        </span>
+    </>,
+];
 
 export const HowItWorksShowcase = () => {
     // Local state for metrics
@@ -24,11 +135,14 @@ export const HowItWorksShowcase = () => {
         Record<string, Date>
     >({});
 
+    const [currentScript, setCurrentScript] = useState(scripts[0]);
+
     const clientConfig: ClientConfig = useMemo(() => {
         const timeContext = generateTimeContext();
 
         return {
             apiUrl: "wss://memonic-api.fly.dev/ws",
+            // apiUrl: "ws://localhost:8080/ws",
             language: "en-US",
             stt: {
                 interimStabilityThreshold: 0.8,
@@ -82,13 +196,13 @@ Remember: *better to output nothing than something wrong.*
                     defineFunction({
                         name: "create_new_record",
                         description:
-                            "Create a new customer record with all available information",
+                            "Create a new customer record with all available information. Fields may not be explicitly referred to by their descriptive names.",
                         parameters: {
                             type: "object",
                             properties: {
                                 customer_name: {
                                     type: "string",
-                                    description: "The customer's full name",
+                                    description: "The customer's full name.",
                                 },
                                 priority: {
                                     type: "string",
@@ -100,15 +214,15 @@ Remember: *better to output nothing than something wrong.*
                                 notes: {
                                     type: "string",
                                     description:
-                                        "Any additional information about the request",
+                                        "Any notes or additional information about the request. This could be implied.",
                                 },
                             },
-                            required: ["customer_name", "priority"],
+                            required: ["customer_name", "priority", "notes"],
                         },
                     }),
                     defineFunction({
-                        name: "update_customer",
-                        description: "Update the customer's name",
+                        name: "schedule_follow_up",
+                        description: "Schedule a follow-up with a customer",
                         parameters: {
                             type: "object",
                             properties: {
@@ -116,13 +230,73 @@ Remember: *better to output nothing than something wrong.*
                                     type: "string",
                                     description: "The customer's full name",
                                 },
+                                follow_up_date: {
+                                    type: "string",
+                                    format: "date",
+                                    description:
+                                        "The date for the follow-up in YYYY-MM-DD format",
+                                },
+                                method: {
+                                    type: "string",
+                                    enum: [
+                                        "email",
+                                        "phone",
+                                        "sms",
+                                        "in-person",
+                                    ],
+                                    description:
+                                        "Preferred method of follow-up",
+                                },
+                                notes: {
+                                    type: "string",
+                                    description:
+                                        "Optional notes about the follow-up",
+                                },
                             },
-                            required: ["customer_name"],
+                            required: [
+                                "customer_name",
+                                "follow_up_date",
+                                "method",
+                            ],
                         },
                     }),
                     defineFunction({
-                        name: "update_priority",
-                        description: "Update the priority level of the request",
+                        name: "update_existing_record",
+                        description:
+                            "Update an existing customer record with new details",
+                        parameters: {
+                            type: "object",
+                            properties: {
+                                customer_name: {
+                                    type: "string",
+                                    description:
+                                        "The full name of the customer whose record should be updated",
+                                },
+                                field: {
+                                    type: "string",
+                                    enum: [
+                                        "email",
+                                        "phone",
+                                        "address",
+                                        "status",
+                                        "notes",
+                                    ],
+                                    description:
+                                        "The field to update in the record",
+                                },
+                                new_value: {
+                                    type: "string",
+                                    description:
+                                        "The new value for the selected field",
+                                },
+                            },
+                            required: ["customer_name", "field", "new_value"],
+                        },
+                    }),
+
+                    defineFunction({
+                        name: "set_priority",
+                        description: "Sets the priority level of the request.",
                         parameters: {
                             type: "object",
                             properties: {
@@ -138,19 +312,44 @@ Remember: *better to output nothing than something wrong.*
                         },
                     }),
                     defineFunction({
-                        name: "update_notes",
+                        name: "update_scheduled_follow_up",
                         description:
-                            "Update additional notes about the request.",
+                            "Update an existing scheduled follow-up with new details",
                         parameters: {
                             type: "object",
                             properties: {
+                                customer_name: {
+                                    type: "string",
+                                    description: "The customer's full name",
+                                },
+                                follow_up_date: {
+                                    type: "string",
+                                    format: "date",
+                                    description:
+                                        "The new date for the follow-up in YYYY-MM-DD format",
+                                },
+                                method: {
+                                    type: "string",
+                                    enum: [
+                                        "email",
+                                        "phone",
+                                        "sms",
+                                        "in-person",
+                                    ],
+                                    description:
+                                        "The new preferred method of follow-up",
+                                },
                                 notes: {
                                     type: "string",
                                     description:
-                                        "Any additional information about the request, this could be a note or a comment.",
+                                        "New notes about the follow-up",
                                 },
                             },
-                            required: ["notes"],
+                            required: [
+                                "customer_name",
+                                "follow_up_date",
+                                "method",
+                            ],
                         },
                     }),
                 ],
@@ -174,19 +373,23 @@ Remember: *better to output nothing than something wrong.*
         config: clientConfig,
     });
 
+    const transcriptFinal = useMemo(() => {
+        return {
+            text: rawTranscriptFinal.text,
+            confidence: rawTranscriptFinal.confidence ?? 1,
+        };
+    }, [rawTranscriptFinal]);
+
     // Ensure transcripts have required confidence field
-    const transcriptFinal: Transcript = {
-        text: rawTranscriptFinal.text,
-        confidence: rawTranscriptFinal.confidence ?? 1,
-    };
+    // const transcriptFinal: Transcript = {
+    //     text: rawTranscriptFinal.text,
+    //     confidence: rawTranscriptFinal.confidence ?? 1,
+    // };
 
     const transcriptInterim: Transcript = {
         text: rawTranscriptInterim.text,
         confidence: rawTranscriptInterim.confidence ?? 0.5,
     };
-
-    // console.log("DRAFTS: ", drafts);
-    // console.log("FUNCTIONS: ", functions);
 
     // Auto-connect when component mounts
     useEffect(() => {
@@ -269,21 +472,22 @@ Remember: *better to output nothing than something wrong.*
                     For example:
                     <br />
                     <br />
-                    <span className="font-medium text-foreground/50">
-                        "I need to{" "}
-                        <span className="text-primary">
-                            create a new record
-                        </span>{" "}
-                        for the customer{" "}
-                        <span className="text-primary">John Smith.</span>
-                        The priority for the request is{" "}
-                        <span className="text-primary">urgent</span> and he
-                        mentioned he needs{" "}
-                        <span className="text-primary">
-                            immediate assistance with his account.
-                        </span>
-                        "
-                    </span>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="mb-4 hover:bg-primary-foreground/90 hover:border hover:scale-110 rounded-lg hover:text-primary border"
+                        onClick={() => {
+                            setCurrentScript(
+                                scripts[
+                                    Math.floor(Math.random() * scripts.length)
+                                ]
+                            );
+                        }}
+                    >
+                        <Sparkles className="w-4 h-4" />
+                    </Button>
+                    <br />
+                    {currentScript}
                 </p>
             </div>
 

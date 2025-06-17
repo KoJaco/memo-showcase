@@ -15,7 +15,7 @@ import {
 } from "~/lib/llm-context";
 
 // Import our extracted components and utilities
-import { TranscriptObject, FormField, Template } from "./types";
+import { FormField, FormFieldValue, Template } from "./types";
 import { initializeTemplates } from "./templates";
 
 import { TemplateSelector } from "./template-selector";
@@ -30,43 +30,6 @@ import {
 
 import { FloatingRecordingMenu } from "./floating-recording-menu";
 import { cn } from "~/lib/utils";
-
-// Add utility function after the imports and before the Demo component
-const camelCaseToReadable = (str: string): string => {
-    return str
-        .replace(/([A-Z])/g, " $1") // Add space before capital letters
-        .replace(/^./, (char) => char.toUpperCase()) // Capitalize first letter
-        .trim();
-};
-
-const formatTranscriptTime = (
-    timestamp: Date,
-    recordingStartTime: Date | null
-): string => {
-    if (!recordingStartTime) return "at start";
-
-    const elapsedSeconds = Math.max(
-        0,
-        (timestamp.getTime() - recordingStartTime.getTime()) / 1000
-    );
-
-    if (elapsedSeconds < 60) {
-        return `at ${Math.round(elapsedSeconds)}s`;
-    } else {
-        const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = Math.round(elapsedSeconds % 60);
-        return `at ${minutes}m ${seconds}s`;
-    }
-};
-
-// Add formatDurationMinutes helper function
-const formatDurationMinutes = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours === 0) return `${mins} minutes`;
-    if (mins === 0) return `${hours} hours`;
-    return `${hours} hours ${mins} minutes`;
-};
 
 // Update the FormConfig type to match the new structure
 type FormConfig = {
@@ -99,31 +62,12 @@ const templateToFormConfig = (template: Template): FormConfig => ({
 
 const Memo = () => {
     // Local state
-    const [activeTab, setActiveTab] = useState("demo");
     const [recordingStartTime, setRecordingStartTime] = useState<Date | null>(
         null
     );
-    const [recordingDuration, setRecordingDuration] = useState(0);
-    const [wordCount, setWordCount] = useState(0);
-    const [averageStability, setAverageStability] = useState(0);
+
     const [isRecording, setIsRecording] = useState(false);
     // const [formValues, setFormValues] = useState<Record<string, any>>({});
-
-    // Function tracking state
-    const [functionTimestamps, setFunctionTimestamps] = useState<
-        Record<string, Date>
-    >({});
-    const [totalFieldsUpdated, setTotalFieldsUpdated] = useState(0);
-    const [confirmationTimestamps, setConfirmationTimestamps] = useState<
-        Record<string, Date>
-    >({});
-
-    // Template management state
-    const [isEditingTemplate, setIsEditingTemplate] = useState(false);
-    const [editingTemplateIndex, setEditingTemplateIndex] = useState<
-        number | null
-    >(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Template state
     const [availableTemplates, setAvailableTemplates] = useState<Template[]>(
@@ -140,12 +84,10 @@ const Memo = () => {
     });
 
     // Separate form state from template data
-    const [formValues, setFormValues] = useState<Record<string, any>>({});
+    const [formValues, setFormValues] = useState<
+        Record<string, FormFieldValue>
+    >({});
     const [isDraft, setIsDraft] = useState<Record<string, boolean>>({});
-
-    const removeTemplate = (index: number) => {
-        setAvailableTemplates((prev) => prev.filter((_, i) => i !== index));
-    };
 
     // Recording handlers
     const handleRecording = () => {
@@ -184,16 +126,19 @@ const Memo = () => {
 
     // Initialize templates on mount
     useEffect(() => {
-        // console.log("🚀 Initializing templates...");
         const templates = initializeTemplates();
-        // console.log("📦 Templates received:", templates);
-        // console.log("🔍 First template:", templates[0]);
-        // console.log("🔍 First template fields:", templates[0]?.fields);
         setAvailableTemplates(templates);
 
-        // Automatically load the first template if available
         if (templates.length > 0) {
-            loadTemplate(templates[0]);
+            setFormData(templateToFormConfig(templates[0]));
+
+            // Clear form values when loading new template
+            setFormValues({});
+            setIsDraft({});
+
+            setTimeout(() => {
+                connect();
+            }, 500);
         }
     }, []);
 
@@ -232,20 +177,6 @@ const Memo = () => {
         }
     };
 
-    const clearAllTemplates = () => {
-        if (confirm("Are you sure you want to clear all templates?")) {
-            setAvailableTemplates([]);
-            setFormData({
-                id: "",
-                name: "",
-                description: "",
-                fields: [],
-            });
-            setFormValues({});
-            setIsDraft({});
-        }
-    };
-
     const nextTemplate = () => {
         setCurrentTemplateIndex((prev) =>
             prev >= availableTemplates.length - 1 ? 0 : prev + 1
@@ -271,21 +202,6 @@ const Memo = () => {
 
     const getCurrentTemplate = () => {
         return availableTemplates[currentTemplateIndex];
-    };
-
-    // Clear transcript and functions
-    const clearTranscriptAndFunctions = () => {
-        // Clear transcript and function states from the SDK
-        clearTranscript();
-
-        // Reset local tracking states
-        setWordCount(0);
-        setTotalFieldsUpdated(0);
-        setFunctionTimestamps({});
-        setConfirmationTimestamps({});
-        setRecordingDuration(0);
-        setAverageStability(0);
-        setRecordingStartTime(null); // Reset recording start time on explicit clear
     };
 
     /* --------------------------------------------------------------- */
@@ -384,8 +300,6 @@ const Memo = () => {
     }, [formData]);
 
     const {
-        transcriptFinal,
-        transcriptInterim,
         functions,
         drafts, // ← merged manager output
         connectionStatus,
@@ -393,145 +307,45 @@ const Memo = () => {
         disconnect,
         startRecording,
         stopRecording,
-        clearTranscript,
     } = useMemonic({ config: clientCfg });
 
-    // console.log(transcriptFinal);
-
-    // console.log("DRAFTS PICKED: ", drafts);
-
-    // Effects for tracking metrics
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (isRecording && recordingStartTime) {
-            interval = setInterval(() => {
-                const now = new Date();
-                const duration = Math.floor(
-                    (now.getTime() - recordingStartTime.getTime()) / 1000
-                );
-                setRecordingDuration(duration);
-            }, 1000);
+    function ValidateFormFieldValue(value: unknown): FormFieldValue {
+        if (typeof value === "string") {
+            if (value === "intermediate") return "intermediate";
+            return value;
         }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [isRecording, recordingStartTime]);
 
-    // Track word count from transcript
-    useEffect(() => {
-        const finalText =
-            typeof transcriptFinal === "object"
-                ? (transcriptFinal as TranscriptObject).text
-                : transcriptFinal || "";
-        const words = finalText
-            .trim()
-            .split(/\s+/)
-            .filter((word) => word.length > 0);
-        setWordCount(words.length);
-    }, [transcriptFinal]);
-
-    // Track average stability
-    useEffect(() => {
-        if (
-            typeof transcriptInterim === "object" &&
-            transcriptInterim.stability !== undefined
-        ) {
-            setAverageStability(transcriptInterim.stability);
+        if (typeof value === "number") {
+            return value;
         }
-    }, [transcriptInterim]);
 
-    // Track function updates and timestamps
-    useEffect(() => {
-        if (functions.length > 0) {
-            const now = new Date();
-            const newTimestamps: Record<string, Date> = {};
-            const newConfirmationTimestamps: Record<string, Date> = {};
-            let fieldCount = 0;
-
-            // console.log(
-            //     "🕒 Processing functions for timestamps:",
-            //     functions.length
-            // );
-            // console.log("🕒 Recording start time:", recordingStartTime);
-            // console.log("🕒 Current time:", now);
-
-            functions.forEach((func) => {
-                const argKeys = Object.keys(func.args || {}).filter(
-                    (arg) => arg !== "id"
-                );
-                fieldCount += argKeys.length;
-
-                // Create a unique key for this function call
-                const functionKey = `${func.name}_${JSON.stringify(func.args)}`;
-
-                // Only set timestamp if we don't already have one for this exact function call
-                if (!functionTimestamps[functionKey]) {
-                    newTimestamps[functionKey] = now;
-                    // console.log(
-                    //     "🕒 Setting new timestamp for:",
-                    //     functionKey,
-                    //     now
-                    // );
-                }
-
-                // Track confirmation timestamp for this specific function
-                const confirmationKey = func.name.replace("update_", "");
-
-                // Only set confirmation timestamp if we don't already have one
-                if (!confirmationTimestamps[confirmationKey]) {
-                    newConfirmationTimestamps[confirmationKey] = now;
-                    // console.log(
-                    //     "🕒 Setting confirmation timestamp for:",
-                    //     confirmationKey,
-                    //     now
-                    // );
-                }
-            });
-
-            // Only update if we have new timestamps
-            if (Object.keys(newTimestamps).length > 0) {
-                setFunctionTimestamps((prev) => ({
-                    ...prev,
-                    ...newTimestamps,
-                }));
-            }
-            if (Object.keys(newConfirmationTimestamps).length > 0) {
-                setConfirmationTimestamps((prev) => ({
-                    ...prev,
-                    ...newConfirmationTimestamps,
-                }));
-            }
-            setTotalFieldsUpdated((prev) => prev + fieldCount);
+        if (typeof value === "boolean") {
+            return value;
         }
-    }, [
-        functions,
-        functionTimestamps,
-        confirmationTimestamps,
-        recordingStartTime,
-    ]);
+        if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+            return value as readonly string[];
+        }
 
-    // Clean up old confirmed drafts periodically to prevent infinite growth
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (drafts.length > 20) {
-                // Keep max 20 drafts
-                // This would require a method in the SDK to remove specific drafts
-                // For now, we'll rely on manual clearing
-            }
-        }, 30000); // Check every 30 seconds
-
-        return () => clearInterval(interval);
-    }, [drafts.length]);
+        return undefined;
+    }
 
     const handleFormValueChange = useCallback(
-        (fieldIdentifier: string, value: any) => {
-            // console.log("🔄 Updating form value:", { fieldIdentifier, value });
+        (fieldIdentifier: string, value: unknown) => {
+            // TODO: extrapolate out value's type
+            const val = ValidateFormFieldValue(value);
+
+            if (!val) {
+                console.warn(
+                    "Attempting to handle form value change using an undefined value"
+                );
+                return;
+            }
+
             setFormValues((prev) => {
                 const newValues = {
                     ...prev,
-                    [fieldIdentifier]: value,
+                    [fieldIdentifier]: val,
                 };
-                // console.log("📝 New form values:", newValues);
                 return newValues;
             });
             // Clear draft state when manually editing
@@ -546,29 +360,18 @@ const Memo = () => {
     // Update form values when functions are finalized
     useEffect(() => {
         if (functions && functions.length > 0 && formData.fields.length > 0) {
-            // console.log("📦 Processing finalized functions:", functions);
-
             functions.forEach((funcCall) => {
                 const functionIdentifier = funcCall.name.replace("update_", "");
-                // console.log("🔍 Processing function:", {
-                //     name: funcCall.name,
-                //     identifier: functionIdentifier,
-                //     args: funcCall.args,
-                // });
 
                 const field = formData.fields.find(
                     (f) => f.identifier === functionIdentifier
                 );
 
                 if (field) {
-                    // console.log("✅ Found matching field:", field);
                     const args = { ...funcCall.args };
                     delete args.id;
                     const value = Object.values(args)[0];
-                    // console.log("💾 Setting finalized value:", {
-                    //     field: field.identifier,
-                    //     value,
-                    // });
+
                     setFormValues((prev) => ({
                         ...prev,
                         [field.identifier]: value,
@@ -585,8 +388,6 @@ const Memo = () => {
     // Update draft states
     useEffect(() => {
         if (drafts && drafts.length > 0) {
-            console.log("📝 Processing drafts:", drafts);
-
             drafts.forEach((draft) => {
                 if (
                     draft.status === "pending_confirmation" ||
@@ -596,9 +397,7 @@ const Memo = () => {
                         "update_",
                         ""
                     );
-                    console.log(
-                        `🔍 Draft function name: ${draft.name}, identifier: ${functionIdentifier}, status: ${draft.status}`
-                    );
+
                     const field = formData.fields.find(
                         (f) => f.identifier === functionIdentifier
                     );
@@ -613,10 +412,9 @@ const Memo = () => {
                             const args = { ...draft.args };
                             delete args.id;
                             const value = Object.values(args)[0];
-                            console.log(
-                                `💡 Matched field: ${field.identifier}, value:`,
-                                value
-                            );
+
+                            // TODO: attempt to parse value to appropriate type
+
                             if (value !== undefined) {
                                 setFormValues((prev) => ({
                                     ...prev,
@@ -672,15 +470,14 @@ const Memo = () => {
                                     const isFieldDraft =
                                         isDraft[field.identifier];
 
-                                    // console.log(
-                                    //     `🎯 Rendering field: ${field.identifier}, value:`,
-                                    //     currentValue,
-                                    //     `type: ${field.type}, isDraft:`,
-                                    //     isFieldDraft
-                                    // );
-
                                     switch (field.type) {
                                         case "text":
+                                            if (
+                                                typeof currentValue ===
+                                                "boolean"
+                                            )
+                                                return null;
+
                                             return (
                                                 <TextInput
                                                     key={field.id}
@@ -699,6 +496,11 @@ const Memo = () => {
                                                 />
                                             );
                                         case "number":
+                                            if (
+                                                typeof currentValue ===
+                                                "boolean"
+                                            )
+                                                return null;
                                             return (
                                                 <TextInput
                                                     key={field.id}
@@ -718,11 +520,11 @@ const Memo = () => {
                                                 />
                                             );
                                         case "duration":
-                                            const displayValue = currentValue
-                                                ? formatDurationMinutes(
-                                                      Number(currentValue)
-                                                  )
-                                                : "";
+                                            if (
+                                                typeof currentValue ===
+                                                "boolean"
+                                            )
+                                                return null;
                                             return (
                                                 <TextInput
                                                     key={field.id}
@@ -742,6 +544,11 @@ const Memo = () => {
                                                 />
                                             );
                                         case "textarea":
+                                            if (
+                                                typeof currentValue ===
+                                                "boolean"
+                                            )
+                                                return null;
                                             return (
                                                 <TextAreaInput
                                                     key={field.id}
@@ -760,6 +567,12 @@ const Memo = () => {
                                                 />
                                             );
                                         case "checkbox":
+                                            if (
+                                                typeof currentValue !==
+                                                    "boolean" &&
+                                                currentValue !== "indeterminate"
+                                            )
+                                                return null;
                                             return (
                                                 <CheckboxInput
                                                     key={field.id}
@@ -788,7 +601,12 @@ const Memo = () => {
                                                         field.description
                                                     }
                                                     isDraft={isFieldDraft}
-                                                    value={currentValue}
+                                                    value={
+                                                        typeof currentValue ===
+                                                        "string"
+                                                            ? currentValue
+                                                            : null
+                                                    }
                                                     options={
                                                         field.options || []
                                                     }
@@ -809,7 +627,12 @@ const Memo = () => {
                                                         field.description
                                                     }
                                                     isDraft={isFieldDraft}
-                                                    value={currentValue}
+                                                    value={
+                                                        typeof currentValue ===
+                                                        "string"
+                                                            ? currentValue
+                                                            : ""
+                                                    }
                                                     options={
                                                         field.options || []
                                                     }
@@ -822,6 +645,11 @@ const Memo = () => {
                                                 />
                                             );
                                         case "date":
+                                            if (
+                                                typeof currentValue ===
+                                                "boolean"
+                                            )
+                                                return null;
                                             return (
                                                 <TextInput
                                                     key={field.id}
@@ -841,6 +669,11 @@ const Memo = () => {
                                                 />
                                             );
                                         case "time":
+                                            if (
+                                                typeof currentValue ===
+                                                "boolean"
+                                            )
+                                                return null;
                                             return (
                                                 <TextInput
                                                     key={field.id}

@@ -1,9 +1,7 @@
-import React from "react";
 import { Transcript, FunctionCall } from "~/lib/sdk/types";
 import { FunctionDraftDataReceived } from "~/lib/sdk/index";
-import { cn } from "~/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, MicOff, Trash2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 
 interface TranscriptTimelineProps {
@@ -71,7 +69,7 @@ export const TranscriptTimeline = ({
     const getFunctionValueDisplay = (
         func: FunctionCall | FunctionDraftDataReceived
     ) => {
-        const args = func.args as Record<string, any>;
+        const args = func.args as Record<string, unknown>;
         const filteredArgs = Object.entries(args)
             .filter(([key]) => key !== "id")
             .map(
@@ -158,19 +156,6 @@ export const TranscriptTimeline = ({
                             </div>
                         </div>
                     )}
-
-                    {/* Timeline Scale when not recording */}
-                    {/* {!isRecording &&
-                        (drafts.length > 0 || functions.length > 0) && (
-                            <div className="flex items-center justify-center mb-4">
-                                <div className="flex items-center justify-center text-xs text-muted-foreground">
-                                    <span className="font-medium">
-                                        Total session:{" "}
-                                        {formatDuration(recordingDuration)}
-                                    </span>
-                                </div>
-                            </div>
-                        )} */}
 
                     {/* Desktop Layout - Grid (lg and above) */}
                     <div className="hidden md:block">
@@ -290,7 +275,7 @@ export const TranscriptTimeline = ({
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div className="flex items-center space-x-2">
                                                         <div className="bg-green-700 rounded-full w-1 h-1" />
-                                                        <span className="text-xs font-medium">
+                                                        <span className="text-xs font-medium capitalize">
                                                             {getFunctionDisplayName(
                                                                 func.name
                                                             )}
@@ -307,7 +292,7 @@ export const TranscriptTimeline = ({
                                                 </div>
                                                 <div className="space-y-1">
                                                     <div className="flex flex-col text-xs gap-y-1">
-                                                        <span className="text-foreground/75 font-mono text-xs">
+                                                        <span className="text-foreground/75 font-mono text-xs whitespace-break-spaces">
                                                             {getFunctionValueDisplay(
                                                                 func
                                                             )}

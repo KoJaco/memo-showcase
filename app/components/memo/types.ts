@@ -25,6 +25,15 @@ export type FormField = {
     draft?: boolean;
 };
 
+type CheckedState = boolean | "indeterminate";
+
+export type FormFieldValue =
+    | string
+    | readonly string[]
+    | number
+    | undefined
+    | CheckedState;
+
 export type Template = {
     id: string;
     name: string;
