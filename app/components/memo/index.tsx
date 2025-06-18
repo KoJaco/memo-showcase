@@ -88,6 +88,7 @@ const Memo = () => {
         Record<string, FormFieldValue>
     >({});
     const [isDraft, setIsDraft] = useState<Record<string, boolean>>({});
+    const [openSelectField, setOpenSelectField] = useState<string | null>(null);
 
     // Recording handlers
     const handleRecording = () => {
@@ -103,6 +104,9 @@ const Memo = () => {
             // );
             stopRecording();
             setIsRecording(false);
+            // Clear all draft statuses when stopping recording
+            setIsDraft({});
+            setOpenSelectField(null);
             // Don't reset recordingStartTime - keep it for timestamp calculations
         } else {
             // console.log(
@@ -380,6 +384,10 @@ const Memo = () => {
                         ...prev,
                         [field.identifier]: false,
                     }));
+                    // Close the select menu when a value is successfully filled in through function parsing
+                    if (field.type === "select") {
+                        setOpenSelectField(null);
+                    }
                 }
             });
         }
@@ -407,6 +415,12 @@ const Memo = () => {
                             ...prev,
                             [field.identifier]: true,
                         }));
+
+                        // If this is a select field, open its menu
+                        if (field.type === "select") {
+                            setOpenSelectField(field.identifier);
+                        }
+
                         // Only insert args if status is pending_confirmation
                         if (draft.status === "pending_confirmation") {
                             const args = { ...draft.args };
@@ -636,12 +650,19 @@ const Memo = () => {
                                                     options={
                                                         field.options || []
                                                     }
-                                                    onValueChange={(value) =>
+                                                    open={
+                                                        openSelectField ===
+                                                        field.identifier
+                                                    }
+                                                    onValueChange={(value) => {
                                                         handleFormValueChange(
                                                             field.identifier,
                                                             value
-                                                        )
-                                                    }
+                                                        );
+                                                        setOpenSelectField(
+                                                            null
+                                                        );
+                                                    }}
                                                 />
                                             );
                                         case "date":

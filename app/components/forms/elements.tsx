@@ -190,6 +190,7 @@ export const SelectInput = forwardRef<
     React.ComponentPropsWithoutRef<typeof Select> &
         BaseFieldProps & {
             options: string[];
+            open?: boolean;
         }
 >(
     (
@@ -201,21 +202,29 @@ export const SelectInput = forwardRef<
             isDraft,
             value,
             onValueChange,
+            open,
             ...props
         },
         ref
     ) => {
         const id = useId();
         const [selectedValue, setSelectedValue] = useState(value);
+        const [isOpen, setIsOpen] = useState(open);
 
         // Update local state when value prop changes
         useEffect(() => {
             setSelectedValue(value);
         }, [value]);
 
+        // Update open state when open prop changes
+        useEffect(() => {
+            setIsOpen(open);
+        }, [open]);
+
         const handleValueChange = (newValue: string) => {
             setSelectedValue(newValue);
             onValueChange?.(newValue);
+            setIsOpen(false);
         };
 
         return (
@@ -235,6 +244,8 @@ export const SelectInput = forwardRef<
                     <Select
                         value={selectedValue}
                         onValueChange={handleValueChange}
+                        open={isOpen}
+                        onOpenChange={setIsOpen}
                         {...props}
                     >
                         <SelectTrigger

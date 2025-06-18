@@ -217,30 +217,177 @@ const SECTIONS: Record<TypeofSection, TSection> = {
                     Once Memo is released, you&apos;ll be able to:
                 </p>
 
-                <ul className="mt-8 space-y-4 text-sm text-foreground/50">
+                <ul className="mt-8 space-y-8 text-sm text-foreground/50">
                     <li>
                         <strong>1.</strong> Sign up for a free Memo account to
                         get started.
+                        {/* <div className="mt-4 p-4 bg-primary-foreground/75 rounded-lg border border-foreground/10">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Free Tier
+                                    </span>
+                                    <div className="h-4 w-8 rounded-full bg-primary/20 relative">
+                                        <div className="absolute right-0 h-4 w-4 rounded-full bg-primary" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Pro Tier
+                                    </span>
+                                    <div className="h-4 w-8 rounded-full bg-primary/20 relative">
+                                        <div className="absolute left-0 h-4 w-4 rounded-full bg-primary" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Enterprise
+                                    </span>
+                                    <div className="h-4 w-8 rounded-full bg-primary/20 relative">
+                                        <div className="absolute left-0 h-4 w-4 rounded-full bg-primary" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div> */}
                     </li>
                     <li>
                         <strong>2.</strong> Customize your component preferences
                         — choose guidance settings, adjust field filling
                         behavior, and optionally apply your own branding styles.
+                        <div className="mt-4 p-4 bg-primary-foreground/75 rounded-lg border border-foreground/10">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Record Transcripts
+                                    </span>
+                                    <div className="h-4 w-8 rounded-full bg-primary/20 relative">
+                                        <div className="absolute right-0 h-4 w-4 rounded-full bg-primary" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Pass Through Privacy Policy
+                                    </span>
+                                    <div className="h-4 w-8 rounded-full bg-primary/20 relative">
+                                        <div className="absolute left-0 h-4 w-4 rounded-full bg-primary" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Allow User Settings
+                                    </span>
+                                    <div className="h-4 w-8 rounded-full bg-primary/20 relative">
+                                        <div className="absolute right-0 h-4 w-4 rounded-full bg-primary" />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Custom Branding
+                                    </span>
+                                    <div className="h-4 w-8 rounded-full bg-primary/20 relative">
+                                        <div className="absolute right-0 h-4 w-4 rounded-full bg-primary" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        ...
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </li>
                     <li>
                         <strong>3.</strong> Copy a small generated script tag
                         and paste it into your website&apos;s HTML.
+                        <div className="mt-4 p-4 bg-primary-foreground/75 rounded-lg border border-foreground/10 font-mono text-xs">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-foreground/75">
+                                    script.js
+                                </span>
+                                <button className="text-foreground/50 hover:text-foreground transition-colors">
+                                    Copy
+                                </button>
+                            </div>
+                            <div className="text-foreground/75 whitespace-normal ">
+                                <code>
+                                    &lt;script
+                                    src="https://cdn.memo.ai/v1/memo.min.js"
+                                    data-site-url="your-site-url"
+                                    data-theme="custom"
+                                    data-auto-init="true"&gt;&lt;/script&gt;
+                                </code>
+                            </div>
+                        </div>
                     </li>
                     <li>
                         <strong>4.</strong> Memo automatically detects forms and
                         gently pops up when in view, offering a seamless voice
                         input option to your visitors.
+                        {/* <div className="mt-4 p-4 bg-primary-foreground/75 rounded-lg border border-foreground/10">
+                            <div className="relative h-32 bg-background/50 rounded-lg overflow-hidden">
+                                <div className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <div className="w-6 h-6 rounded-full bg-primary" />
+                                </div>
+                                <div className="absolute top-4 left-4 w-24 h-8 bg-primary/20 rounded-full" />
+                                <div className="absolute top-4 right-4 w-16 h-8 bg-primary/20 rounded-full" />
+                                <div className="absolute top-16 left-4 w-full h-8 bg-primary/20 rounded-full" />
+                            </div>
+                        </div> */}
                     </li>
                     <li>
                         <strong>5.</strong> View structured analytics and usage
                         metrics directly in your dashboard — including
                         completions, full transcripts, cost monitoring,
                         drop-offs, and voice command insights.
+                        <div className="mt-4 p-4 bg-primary-foreground/75 rounded-lg border border-foreground/10">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Completions
+                                    </span>
+                                    <span className="text-foreground/75">
+                                        96%
+                                    </span>
+                                </div>
+                                <div className="h-2 w-full bg-primary/20 rounded-full overflow-hidden">
+                                    <div className="h-full w-[87%] bg-primary rounded-full" />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Fields left Pending
+                                    </span>
+                                    <span className="text-foreground/75">
+                                        4%
+                                    </span>
+                                </div>
+                                <div className="h-2 w-full bg-primary/20 rounded-full overflow-hidden">
+                                    <div className="h-full w-[4%] bg-primary rounded-full" />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Average Transcript Words
+                                    </span>
+                                    <span className="text-foreground/75">
+                                        42
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        Average Cost per Form
+                                    </span>
+                                    <span className="text-foreground/75">
+                                        $0.0067
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <span className="text-foreground/75">
+                                        ...
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </div>
