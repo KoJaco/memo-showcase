@@ -17,7 +17,7 @@ interface InfoDialogProps {
 export function InfoDialog({ open, onOpenChange }: InfoDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[95vw] sm:max-w-[540px] bg-background/75 backdrop-blur-sm">
+            <DialogContent className="max-w-[95vw] sm:max-w-[540px] bg-background/75 backdrop-blur-sm ">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 mb-6 text-primary">
                         <Info className="w-5 h-5" />
@@ -34,22 +34,32 @@ export function InfoDialog({ open, onOpenChange }: InfoDialogProps) {
                                     For unusual words or names, spell them out
                                 </li>
                                 <li>
-                                    You can separate letters with spaces for
-                                    better accuracy (e.g., "John is spelt J O H
-                                    N")
+                                    You can add a space between words by simply
+                                    saying the word (e.g., "John Clark is spelt
+                                    J O H N space C L A R K")
                                 </li>
                                 <li>Use natural pauses between words</li>
+                                <li>
+                                    Refer to form fields explicitly and then
+                                    state their value (e.g., "the customer's
+                                    name is John Smith")
+                                </li>
                             </ul>
                         </div>
                         <div className="space-y-2 text-left">
                             <h3 className="font-medium text-foreground">
-                                Common Commands
+                                What you can do
                             </h3>
                             <ul className="list-disc pl-4 space-y-1 text-sm text-foreground/50">
-                                <li>"New line" - Start a new line</li>
-                                <li>"Period" or "Full stop" - Add a period</li>
-                                <li>"Comma" - Add a comma</li>
-                                <li>"Question mark" - Add a question mark</li>
+                                <li>
+                                    Use relative dates - memo knows what the
+                                    current date and time is (e.g., "book it for
+                                    two weeks from now")
+                                </li>
+                                <li>
+                                    Correct yourself if you make a mistake
+                                    without pausing the audio
+                                </li>
                             </ul>
                         </div>
                         <div className="space-y-2 text-left">
